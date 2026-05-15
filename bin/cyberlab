@@ -1,0 +1,1111 @@
+#!/bin/bash
+
+source "$HOME/CyberLab/core/bootstrap.sh"
+
+CMD="$1"
+shift || true
+
+case "$CMD" in
+
+  run-basic)
+    bash "$CYBERLAB_MODULES/ops/run-basic.sh" "$@"
+    ;;
+
+  cleanup)
+    bash "$CYBERLAB_MODULES/ops/cleanup.sh"
+    ;;
+
+  validate-delivery)
+    bash "$CYBERLAB_MODULES/ops/validate-delivery.sh" "$@"
+    ;;
+
+  export-findings)
+    python3 "$CYBERLAB_MODULES/export/findings-export.py"
+    ;;
+
+  executive-summary)
+    python3 "$CYBERLAB_MODULES/export/executive-summary.py"
+    ;;
+
+
+  intelligence)
+    bash "$HOME/CyberLab/modules/intelligence/unified-intelligence.sh"
+    ;;
+
+  risk)
+    python3 "$CYBERLAB_MODULES/risk/risk-engine.py" "$@"
+    ;;
+
+  findings)
+    python3 "$CYBERLAB_MODULES/findings/findings-engine.py" "$@"
+    ;;
+
+  assets)
+    python3 "$CYBERLAB_MODULES/assets/asset-engine.py" "$@"
+    ;;
+
+  timeline)
+    python3 "$CYBERLAB_MODULES/timeline/timeline-engine.py" "$@"
+    ;;
+
+  analytics)
+    python3 "$CYBERLAB_MODULES/analytics/analytics-engine.py" "$@"
+    ;;
+
+  remediation)
+    python3 "$CYBERLAB_MODULES/remediation/remediation-engine.py" "$@"
+    ;;
+
+
+
+  # === CYBERLAB_BLOCK_12_13_CASES ===
+  block12|bloco12|intelligence12)
+    TARGET="${1:-}"
+
+    if [ -z "$TARGET" ]; then
+      echo "[ERRO] Informe o domínio autorizado."
+      echo "Uso: cyberlab block12 dominio.com"
+      exit 1
+    fi
+
+    cd "$HOME/CyberLab" || exit 1
+
+    if [ -d "$HOME/CyberLab/.venv" ]; then
+      source "$HOME/CyberLab/.venv/bin/activate"
+    fi
+
+    echo ""
+    echo "=== CyberLab - Bloco 12 Intelligence Engine ==="
+    echo "Alvo autorizado: $TARGET"
+    echo "Modo: análise local de evidências já coletadas"
+    echo ""
+
+    python3 modules/block_12_intelligence.py --target "$TARGET"
+    ;;
+
+  block13|bloco13|delivery13)
+    TARGET="${1:-}"
+
+    if [ -z "$TARGET" ]; then
+      echo "[ERRO] Informe o domínio autorizado."
+      echo "Uso: cyberlab block13 dominio.com"
+      exit 1
+    fi
+
+    cd "$HOME/CyberLab" || exit 1
+
+    if [ -d "$HOME/CyberLab/.venv" ]; then
+      source "$HOME/CyberLab/.venv/bin/activate"
+    fi
+
+    echo ""
+    echo "=== CyberLab - Bloco 13 Delivery Enterprise ==="
+    echo "Alvo autorizado: $TARGET"
+    echo "Modo: geração local de relatórios a partir do Bloco 12"
+    echo ""
+
+    python3 modules/block_13_delivery.py --target "$TARGET"
+    ;;
+
+  final|final-report|pipeline-final)
+    TARGET="${1:-}"
+
+    if [ -z "$TARGET" ]; then
+      echo "[ERRO] Informe o domínio autorizado."
+      echo "Uso: cyberlab final dominio.com"
+      exit 1
+    fi
+
+    cd "$HOME/CyberLab" || exit 1
+
+    if [ -d "$HOME/CyberLab/.venv" ]; then
+      source "$HOME/CyberLab/.venv/bin/activate"
+    fi
+
+    echo ""
+    echo "============================================================"
+    echo " CyberLab - Pipeline Final Controlado"
+    echo "============================================================"
+    echo " Alvo autorizado: $TARGET"
+    echo " Etapas: Bloco 12 -> Bloco 13 -> validação"
+    echo " Modo: leitura local de resultados já coletados"
+    echo "============================================================"
+    echo ""
+
+    echo "[CHECK] Validando sintaxe dos módulos..."
+    python3 -m py_compile core/block_12_engine.py || exit 1
+    python3 -m py_compile modules/block_12_intelligence.py || exit 1
+    python3 -m py_compile core/block_13_report.py || exit 1
+    python3 -m py_compile modules/block_13_delivery.py || exit 1
+    echo "[OK] Sintaxe validada"
+    echo ""
+
+    echo "============================================================"
+    echo " Etapa 12 - Intelligence Engine"
+    echo "============================================================"
+    python3 modules/block_12_intelligence.py --target "$TARGET" || exit 1
+
+    echo ""
+    echo "============================================================"
+    echo " Etapa 13 - Delivery Enterprise"
+    echo "============================================================"
+    python3 modules/block_13_delivery.py --target "$TARGET" || exit 1
+
+    LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+
+    if [ -z "$LATEST_SCAN" ]; then
+      echo "[ERRO] Não foi possível localizar a última pasta de scan."
+      exit 1
+    fi
+
+    BLOCK12_JSON="$LATEST_SCAN/block_12_intelligence/block_12_findings.json"
+    BLOCK12_STATUS="$LATEST_SCAN/block_12_intelligence/block_12_status.json"
+    BLOCK13_SLA="$LATEST_SCAN/block_13_delivery/sla_timeline.json"
+    BLOCK13_STATUS="$LATEST_SCAN/block_13_delivery/block_13_status.json"
+
+    echo ""
+    echo "[CHECK] Validando JSONs finais..."
+
+    python3 -m json.tool "$BLOCK12_JSON" > /dev/null || exit 1
+    echo "[OK] Bloco 12 findings JSON"
+
+    python3 -m json.tool "$BLOCK12_STATUS" > /dev/null || exit 1
+    echo "[OK] Bloco 12 status JSON"
+
+    python3 -m json.tool "$BLOCK13_SLA" > /dev/null || exit 1
+    echo "[OK] Bloco 13 SLA JSON"
+
+    python3 -m json.tool "$BLOCK13_STATUS" > /dev/null || exit 1
+    echo "[OK] Bloco 13 status JSON"
+
+    echo ""
+    echo "============================================================"
+    echo " Resumo Final"
+    echo "============================================================"
+
+    python3 - << PY2
+import json
+from pathlib import Path
+
+p = Path("$BLOCK12_JSON")
+data = json.loads(p.read_text(encoding="utf-8"))
+s = data.get("summary", {})
+
+print("Alvo:", data.get("target"))
+print("Pasta do scan:", "$LATEST_SCAN")
+print("Total de achados:", s.get("total_findings"))
+print("Achados de risco real:", s.get("risk_findings"))
+print("Achados de superfície:", s.get("surface_findings"))
+print("Score risco real:", s.get("risk_score_total"))
+print("Score superfície bruto:", s.get("surface_score_total"))
+print("Score superfície ajustado:", s.get("surface_adjusted_score"))
+print("Score final calibrado:", s.get("overall_score"))
+print("Nível geral:", s.get("risk_level"))
+PY2
+
+    echo ""
+    echo "Relatórios finais:"
+    echo "  Executivo PDF:  $LATEST_SCAN/block_13_delivery/executive_report.pdf"
+    echo "  Técnico PDF:    $LATEST_SCAN/block_13_delivery/technical_report.pdf"
+    echo "  Remediação PDF: $LATEST_SCAN/block_13_delivery/remediation_plan.pdf"
+    echo "  Status:         $LATEST_SCAN/block_13_delivery/block_13_status.json"
+    echo ""
+    echo "[OK] Pipeline finalizado dentro do dispatcher real do CyberLab."
+    ;;
+  # === END_CYBERLAB_BLOCK_12_13_CASES ===
+
+
+
+  # === CYBERLAB_FULL_ACTIVE_CASE ===
+  full-active|active-full|max-active)
+    TARGET="${1:-}"
+
+    if [ -z "$TARGET" ]; then
+      echo "[ERRO] Informe o domínio autorizado."
+      echo "Uso: cyberlab full-active dominio.com"
+      exit 1
+    fi
+
+    cd "$HOME/CyberLab" || exit 1
+
+    if [ -d "$HOME/CyberLab/.venv" ]; then
+      source "$HOME/CyberLab/.venv/bin/activate"
+    fi
+
+    echo ""
+    echo "============================================================"
+    echo " CyberLab - Full Active Pipeline Controlado"
+    echo "============================================================"
+    echo " Alvo autorizado: $TARGET"
+    echo " Modo: active integrado ao fluxo completo"
+    echo " Controle: escopo, logs, evidências e relatório final"
+    echo "============================================================"
+    echo ""
+
+    echo "[CHECK] Validando dispatcher e módulos principais..."
+    bash -n bin/cyberlab || exit 1
+    bash -n modules/active/active.sh || exit 1
+    python3 -m py_compile core/block_12_engine.py || exit 1
+    python3 -m py_compile modules/block_12_intelligence.py || exit 1
+    python3 -m py_compile core/block_13_report.py || exit 1
+    python3 -m py_compile modules/block_13_delivery.py || exit 1
+    echo "[OK] Validação inicial concluída"
+    echo ""
+
+    echo "============================================================"
+    echo " 01/13 Health"
+    echo "============================================================"
+    "$HOME/CyberLab/bin/cyberlab" health || exit 1
+
+    echo ""
+    echo "============================================================"
+    echo " 02/13 Validate All"
+    echo "============================================================"
+    "$HOME/CyberLab/bin/cyberlab" validate-all || exit 1
+
+    echo ""
+    echo "============================================================"
+    echo " 03/13 Web Scan"
+    echo "============================================================"
+    "$HOME/CyberLab/bin/cyberlab" web "$TARGET" || exit 1
+
+    echo ""
+    echo "============================================================"
+    echo " 04/13 Active Mode"
+    echo "============================================================"
+    "$HOME/CyberLab/bin/cyberlab" active "$TARGET" || exit 1
+
+    echo ""
+    echo "============================================================"
+    echo " 04B/13 Sincronizando evidências do Active"
+    echo "============================================================"
+
+    LATEST_SCAN_ACTIVE="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+    TARGET_SLUG="$(echo "$TARGET" | tr '.:' '--')"
+    LATEST_ACTIVE="$(ls -td "$HOME/CyberLab/results/active/$TARGET_SLUG"* 2>/dev/null | head -n 1)"
+
+    if [ -n "$LATEST_SCAN_ACTIVE" ] && [ -n "$LATEST_ACTIVE" ]; then
+      mkdir -p "$LATEST_SCAN_ACTIVE/08-evidence/active"
+      cp -a "$LATEST_ACTIVE" "$LATEST_SCAN_ACTIVE/08-evidence/active/active-output" 2>/dev/null || true
+      echo "[OK] Active sincronizado em: $LATEST_SCAN_ACTIVE/08-evidence/active"
+    else
+      echo "[AVISO] Saída active não localizada para sincronização automática."
+      echo "[AVISO] O fluxo continuará sem quebrar o pipeline."
+    fi
+
+    # === CYBERLAB_ACTIVE_OUTPUT_SYNC ===
+
+    echo ""
+    echo "============================================================"
+    echo " 05/13 Detect"
+    echo "============================================================"
+    "$HOME/CyberLab/bin/cyberlab" detect "$TARGET" || true
+
+    echo ""
+    echo "============================================================"
+    echo " 06/13 Threat"
+    echo "============================================================"
+    "$HOME/CyberLab/bin/cyberlab" threat "$TARGET" || true
+
+    echo ""
+    echo "============================================================"
+    echo " 07/13 Correlate"
+    echo "============================================================"
+    "$HOME/CyberLab/bin/cyberlab" correlate "$TARGET" || true
+
+    echo ""
+    echo "============================================================"
+    echo " 08/13 Findings"
+    echo "============================================================"
+    "$HOME/CyberLab/bin/cyberlab" findings "$TARGET" || true
+
+    echo ""
+    echo "============================================================"
+    echo " 09/13 Risk"
+    echo "============================================================"
+    "$HOME/CyberLab/bin/cyberlab" risk "$TARGET" || true
+
+    echo ""
+    echo "============================================================"
+    echo " 10/13 Assets"
+    echo "============================================================"
+    "$HOME/CyberLab/bin/cyberlab" assets "$TARGET" || true
+
+    echo ""
+    echo "============================================================"
+    echo " 11/13 Timeline / Analytics / Remediation"
+    echo "============================================================"
+    "$HOME/CyberLab/bin/cyberlab" timeline "$TARGET" || true
+    "$HOME/CyberLab/bin/cyberlab" analytics "$TARGET" || true
+    "$HOME/CyberLab/bin/cyberlab" remediation "$TARGET" || true
+
+    echo ""
+    echo "============================================================"
+    echo " 12/13 Bloco 12 + Bloco 13"
+    echo "============================================================"
+    "$HOME/CyberLab/bin/cyberlab" final "$TARGET" || exit 1
+
+    LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+
+    if [ -z "$LATEST_SCAN" ]; then
+      echo "[ERRO] Não foi possível localizar a última pasta de scan."
+      exit 1
+    fi
+
+    echo ""
+    echo "============================================================"
+    echo " 13/13 Validação Final"
+    echo "============================================================"
+
+    python3 -m json.tool "$LATEST_SCAN/block_12_intelligence/block_12_findings.json" > /dev/null && echo "[OK] Bloco 12 findings"
+    python3 -m json.tool "$LATEST_SCAN/block_12_intelligence/block_12_status.json" > /dev/null && echo "[OK] Bloco 12 status"
+    python3 -m json.tool "$LATEST_SCAN/block_13_delivery/sla_timeline.json" > /dev/null && echo "[OK] Bloco 13 SLA"
+    python3 -m json.tool "$LATEST_SCAN/block_13_delivery/block_13_status.json" > /dev/null && echo "[OK] Bloco 13 status"
+
+    echo ""
+    echo "Relatórios finais:"
+    echo "  Executivo PDF:  $LATEST_SCAN/block_13_delivery/executive_report.pdf"
+    echo "  Técnico PDF:    $LATEST_SCAN/block_13_delivery/technical_report.pdf"
+    echo "  Remediação PDF: $LATEST_SCAN/block_13_delivery/remediation_plan.pdf"
+    echo ""
+    echo "[OK] Full Active Pipeline finalizado."
+    ;;
+  # === END_CYBERLAB_FULL_ACTIVE_CASE ===
+
+
+
+  # === CYBERLAB_BLOCK_14_CASES ===
+  block14|bloco14|validation14|validate-findings)
+    TARGET="${1:-}"
+
+    if [ -z "$TARGET" ]; then
+      echo "[ERRO] Informe o domínio autorizado."
+      echo "Uso: cyberlab block14 dominio.com"
+      exit 1
+    fi
+
+    cd "$HOME/CyberLab" || exit 1
+
+    if [ -d "$HOME/CyberLab/.venv" ]; then
+      source "$HOME/CyberLab/.venv/bin/activate"
+    fi
+
+    echo ""
+    echo "=== CyberLab - Bloco 14 Validation Intelligence ==="
+    echo "Alvo autorizado: $TARGET"
+    echo "Modo: validação contextual local"
+    echo ""
+
+    python3 modules/block_14_validation.py --target "$TARGET"
+    ;;
+
+  validated-final|final-validated|delivery-validated)
+    TARGET="${1:-}"
+
+    if [ -z "$TARGET" ]; then
+      echo "[ERRO] Informe o domínio autorizado."
+      echo "Uso: cyberlab validated-final dominio.com"
+      exit 1
+    fi
+
+    cd "$HOME/CyberLab" || exit 1
+
+    if [ -d "$HOME/CyberLab/.venv" ]; then
+      source "$HOME/CyberLab/.venv/bin/activate"
+    fi
+
+    echo ""
+    echo "============================================================"
+    echo " CyberLab - Final Validado"
+    echo "============================================================"
+    echo " Alvo autorizado: $TARGET"
+    echo " Etapas: Bloco 12 -> Bloco 13 -> Bloco 14"
+    echo "============================================================"
+    echo ""
+
+    "$HOME/CyberLab/bin/cyberlab" final "$TARGET" || exit 1
+    "$HOME/CyberLab/bin/cyberlab" block14 "$TARGET" || exit 1
+
+    LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+
+    echo ""
+    echo "Relatórios finais:"
+    echo "  Executivo PDF:      $LATEST_SCAN/block_13_delivery/executive_report.pdf"
+    echo "  Técnico PDF:        $LATEST_SCAN/block_13_delivery/technical_report.pdf"
+    echo "  Remediação PDF:     $LATEST_SCAN/block_13_delivery/remediation_plan.pdf"
+    echo "  Validação Bloco 14: $LATEST_SCAN/block_14_validation/block_14_validation_report.pdf"
+    echo "  Resumo Cliente 14:  $LATEST_SCAN/block_14_validation/block_14_client_summary.md"
+    echo ""
+    echo "[OK] Final validado concluído."
+    ;;
+
+  full-active-validated|validated-full-active|max-active-validated)
+    TARGET="${1:-}"
+
+    if [ -z "$TARGET" ]; then
+      echo "[ERRO] Informe o domínio autorizado."
+      echo "Uso: cyberlab full-active-validated dominio.com"
+      exit 1
+    fi
+
+    cd "$HOME/CyberLab" || exit 1
+
+    if [ -d "$HOME/CyberLab/.venv" ]; then
+      source "$HOME/CyberLab/.venv/bin/activate"
+    fi
+
+    echo ""
+    echo "============================================================"
+    echo " CyberLab - Full Active Validado"
+    echo "============================================================"
+    echo " Alvo autorizado: $TARGET"
+    echo " Etapas: full-active -> Bloco 14 Validation Intelligence"
+    echo "============================================================"
+    echo ""
+
+    "$HOME/CyberLab/bin/cyberlab" full-active "$TARGET" || exit 1
+    "$HOME/CyberLab/bin/cyberlab" block14 "$TARGET" || exit 1
+
+    LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+
+    echo ""
+    echo "============================================================"
+    echo " Validação final dos artefatos"
+    echo "============================================================"
+
+    python3 -m json.tool "$LATEST_SCAN/block_12_intelligence/block_12_findings.json" > /dev/null && echo "[OK] Bloco 12 findings"
+    python3 -m json.tool "$LATEST_SCAN/block_12_intelligence/block_12_status.json" > /dev/null && echo "[OK] Bloco 12 status"
+    python3 -m json.tool "$LATEST_SCAN/block_13_delivery/sla_timeline.json" > /dev/null && echo "[OK] Bloco 13 SLA"
+    python3 -m json.tool "$LATEST_SCAN/block_13_delivery/block_13_status.json" > /dev/null && echo "[OK] Bloco 13 status"
+    python3 -m json.tool "$LATEST_SCAN/block_14_validation/block_14_validated_findings.json" > /dev/null && echo "[OK] Bloco 14 validated findings"
+    python3 -m json.tool "$LATEST_SCAN/block_14_validation/block_14_insights.json" > /dev/null && echo "[OK] Bloco 14 insights"
+    python3 -m json.tool "$LATEST_SCAN/block_14_validation/block_14_status.json" > /dev/null && echo "[OK] Bloco 14 status"
+
+    echo ""
+    echo "Relatórios finais:"
+    echo "  Executivo PDF:      $LATEST_SCAN/block_13_delivery/executive_report.pdf"
+    echo "  Técnico PDF:        $LATEST_SCAN/block_13_delivery/technical_report.pdf"
+    echo "  Remediação PDF:     $LATEST_SCAN/block_13_delivery/remediation_plan.pdf"
+    echo "  Validação Bloco 14: $LATEST_SCAN/block_14_validation/block_14_validation_report.pdf"
+    echo "  Resumo Cliente 14:  $LATEST_SCAN/block_14_validation/block_14_client_summary.md"
+    echo ""
+    echo "[OK] Full Active Validado finalizado."
+    ;;
+  # === END_CYBERLAB_BLOCK_14_CASES ===
+
+
+
+  # === CYBERLAB_BLOCK_15_CASES ===
+  block15|bloco15|validate-impact|impact-validation)
+    TARGET="${1:-}"
+    MODE="${2:-controlled}"
+
+    if [ -z "$TARGET" ]; then
+      echo "[ERRO] Informe o domínio autorizado."
+      echo "Uso: cyberlab block15 dominio.com [controlled|active-plus|max-controlled]"
+      exit 1
+    fi
+
+    cd "$HOME/CyberLab" || exit 1
+
+    if [ -d "$HOME/CyberLab/.venv" ]; then
+      source "$HOME/CyberLab/.venv/bin/activate"
+    fi
+
+    echo ""
+    echo "=== CyberLab - Bloco 15 Controlled Offensive Validation ==="
+    echo "Alvo autorizado: $TARGET"
+    echo "Modo: $MODE"
+    echo "Controle: escopo, rate limit, logs e validações seguras"
+    echo ""
+
+    python3 modules/block_15_validation.py --target "$TARGET" --mode "$MODE"
+    ;;
+
+  active-plus)
+    TARGET="${1:-}"
+
+    if [ -z "$TARGET" ]; then
+      echo "[ERRO] Informe o domínio autorizado."
+      echo "Uso: cyberlab active-plus dominio.com"
+      exit 1
+    fi
+
+    cd "$HOME/CyberLab" || exit 1
+
+    if [ -d "$HOME/CyberLab/.venv" ]; then
+      source "$HOME/CyberLab/.venv/bin/activate"
+    fi
+
+    echo ""
+    echo "============================================================"
+    echo " CyberLab - Active Plus Controlado"
+    echo "============================================================"
+    echo " Alvo autorizado: $TARGET"
+    echo " Etapas: full-active -> block14 -> block15 active-plus"
+    echo "============================================================"
+    echo ""
+
+    "$HOME/CyberLab/bin/cyberlab" full-active "$TARGET" || exit 1
+    "$HOME/CyberLab/bin/cyberlab" block14 "$TARGET" || exit 1
+    "$HOME/CyberLab/bin/cyberlab" block15 "$TARGET" active-plus || exit 1
+
+    LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+
+    echo ""
+    echo "[OK] Active Plus finalizado."
+    echo "Relatório Bloco 15: $LATEST_SCAN/block_15_controlled_validation/block_15_impact_report.pdf"
+    ;;
+
+  full-offensive-controlled|full-controlled|max-controlled)
+    TARGET="${1:-}"
+
+    if [ -z "$TARGET" ]; then
+      echo "[ERRO] Informe o domínio autorizado."
+      echo "Uso: cyberlab full-offensive-controlled dominio.com"
+      exit 1
+    fi
+
+    cd "$HOME/CyberLab" || exit 1
+
+    if [ -d "$HOME/CyberLab/.venv" ]; then
+      source "$HOME/CyberLab/.venv/bin/activate"
+    fi
+
+    echo ""
+    echo "============================================================"
+    echo " CyberLab - Full Offensive Controlled"
+    echo "============================================================"
+    echo " Alvo autorizado: $TARGET"
+    echo " Fluxo: full-active -> Bloco 14 -> Bloco 15"
+    echo " Segurança: sem brute force, sem bypass, sem payload destrutivo"
+    echo "============================================================"
+    echo ""
+
+    echo "[CHECK] Validando módulos..."
+    bash -n bin/cyberlab || exit 1
+    bash -n modules/active/active.sh || exit 1
+    python3 -m py_compile core/block_12_engine.py || exit 1
+    python3 -m py_compile modules/block_12_intelligence.py || exit 1
+    python3 -m py_compile core/block_14_engine.py || exit 1
+    python3 -m py_compile modules/block_14_validation.py || exit 1
+    python3 -m py_compile core/block_15_engine.py || exit 1
+    python3 -m py_compile modules/block_15_validation.py || exit 1
+    python3 -m py_compile core/block_13_report.py || exit 1
+    python3 -m py_compile modules/block_13_delivery.py || exit 1
+    echo "[OK] Módulos validados"
+    echo ""
+
+    "$HOME/CyberLab/bin/cyberlab" full-active "$TARGET" || exit 1
+    "$HOME/CyberLab/bin/cyberlab" block14 "$TARGET" || exit 1
+    "$HOME/CyberLab/bin/cyberlab" block15 "$TARGET" max-controlled || exit 1
+
+    LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+
+    echo ""
+    echo "============================================================"
+    echo " Validação final dos artefatos"
+    echo "============================================================"
+
+    python3 -m json.tool "$LATEST_SCAN/block_12_intelligence/block_12_findings.json" > /dev/null && echo "[OK] Bloco 12 findings"
+    python3 -m json.tool "$LATEST_SCAN/block_12_intelligence/block_12_status.json" > /dev/null && echo "[OK] Bloco 12 status"
+    python3 -m json.tool "$LATEST_SCAN/block_13_delivery/block_13_status.json" > /dev/null && echo "[OK] Bloco 13 status"
+    python3 -m json.tool "$LATEST_SCAN/block_14_validation/block_14_validated_findings.json" > /dev/null && echo "[OK] Bloco 14 validated"
+    python3 -m json.tool "$LATEST_SCAN/block_14_validation/block_14_status.json" > /dev/null && echo "[OK] Bloco 14 status"
+    python3 -m json.tool "$LATEST_SCAN/block_15_controlled_validation/block_15_validations.json" > /dev/null && echo "[OK] Bloco 15 validations"
+    python3 -m json.tool "$LATEST_SCAN/block_15_controlled_validation/block_15_confirmed_findings.json" > /dev/null && echo "[OK] Bloco 15 confirmed"
+    python3 -m json.tool "$LATEST_SCAN/block_15_controlled_validation/block_15_status.json" > /dev/null && echo "[OK] Bloco 15 status"
+
+    echo ""
+    echo "Relatórios finais:"
+    echo "  Executivo PDF:        $LATEST_SCAN/block_13_delivery/executive_report.pdf"
+    echo "  Técnico PDF:          $LATEST_SCAN/block_13_delivery/technical_report.pdf"
+    echo "  Remediação PDF:       $LATEST_SCAN/block_13_delivery/remediation_plan.pdf"
+    echo "  Validação Bloco 14:   $LATEST_SCAN/block_14_validation/block_14_validation_report.pdf"
+    echo "  Impacto Bloco 15:     $LATEST_SCAN/block_15_controlled_validation/block_15_impact_report.pdf"
+    echo "  Resumo Cliente B15:   $LATEST_SCAN/block_15_controlled_validation/block_15_client_summary.md"
+    echo "  Testes Manuais B15:   $LATEST_SCAN/block_15_controlled_validation/block_15_manual_tests.md"
+    echo ""
+    echo "[OK] Full Offensive Controlled finalizado."
+    ;;
+  # === END_CYBERLAB_BLOCK_15_CASES ===
+
+
+
+  # === CYBERLAB_TOOLS_STACK_CASES ===
+  tools-check|offensive-tools-check)
+    bash "$HOME/CyberLab/tools/offensive_tools_check.sh"
+    ;;
+
+  tools-install|install-offensive-tools)
+    bash "$HOME/CyberLab/tools/installers/install_offensive_stack.sh"
+    ;;
+  # === END_CYBERLAB_TOOLS_STACK_CASES ===
+
+
+
+  # === CYBERLAB_AUDIT_TOOLS_CASE ===
+  audit-tools|tools-audit)
+    TARGET="${1:-}"
+    PROFILE="${2:-safe}"
+
+    if [ -z "$TARGET" ]; then
+      echo "[ERRO] Informe o domínio autorizado."
+      echo "Uso: cyberlab audit-tools dominio.com [safe|active|active-plus|max-controlled]"
+      exit 1
+    fi
+
+    cd "$HOME/CyberLab" || exit 1
+    source "$HOME/CyberLab/.venv/bin/activate" 2>/dev/null || true
+
+    python3 "$HOME/CyberLab/tools/orchestrator/tool_runner.py" \
+      --target "$TARGET" \
+      --profile "$PROFILE"
+    ;;
+
+  audit-tools-approved|tools-audit-approved)
+    TARGET="${1:-}"
+    PROFILE="${2:-active-plus}"
+
+    if [ -z "$TARGET" ]; then
+      echo "[ERRO] Informe o domínio autorizado."
+      echo "Uso: cyberlab audit-tools-approved dominio.com [active-plus|max-controlled]"
+      exit 1
+    fi
+
+    cd "$HOME/CyberLab" || exit 1
+    source "$HOME/CyberLab/.venv/bin/activate" 2>/dev/null || true
+
+    python3 "$HOME/CyberLab/tools/orchestrator/tool_runner.py" \
+      --target "$TARGET" \
+      --profile "$PROFILE" \
+      --approve
+    ;;
+  # === END_CYBERLAB_AUDIT_TOOLS_CASE ===
+
+
+
+  # === CYBERLAB_CLEANUP_LAYER2_CASES ===
+cleanup-obsolete)
+    bash "$HOME/CyberLab/modules/core/cleanup-obsolete.sh" "${1:-dry-run}"
+    ;;
+cleanup-status)
+    bash "$HOME/CyberLab/modules/core/cleanup-status.sh"
+    ;;
+# === END_CYBERLAB_CLEANUP_LAYER2_CASES ===
+
+
+    # === CYBERLAB_LAYER3_AUDIT_CONTEXT_CASE ===
+    audit-context|context)
+        bash "$HOME/CyberLab/modules/core/audit-context.sh" "$@"
+        exit $?
+        ;;
+    # === END_CYBERLAB_LAYER3_AUDIT_CONTEXT_CASE ===
+
+    
+# === CYBERLAB_LAYER4C1_EDITORIAL_CASES ===
+client-final-polish|block17-4c1)
+    bash "$HOME/CyberLab/modules/client_final_delivery/block_17_4c1_editorial_polisher.sh" "${1:-}"
+    ;;
+# === END_CYBERLAB_LAYER4C1_EDITORIAL_CASES ===
+
+# === CYBERLAB_BLOCK17_FINAL_DELIVERY_CASES ===
+client-final-delivery|block17-final|block17)
+    bash "$HOME/CyberLab/modules/client_final_delivery/block_17_final_client_delivery.sh" "${1:-}"
+    exit $?
+    ;;
+# === END_CYBERLAB_BLOCK17_FINAL_DELIVERY_CASES ===
+
+# === CYBERLAB_BLOCK16_CASES ===
+  block16|unified-audit|client-audit-final-approved)
+    CLIENT_NAME="${1:-}"
+    TARGET="${2:-}"
+    PROFILE="${3:-max-controlled}"
+
+    if [ -z "$CLIENT_NAME" ] || [ -z "$TARGET" ]; then
+      echo "[ERRO] Informe cliente e domínio."
+      echo 'Uso: cyberlab block16 "Nome do Cliente" dominio.com [perfil]'
+      echo 'Uso: cyberlab client-audit-final-approved "Nome do Cliente" dominio.com [perfil]'
+      exit 1
+    fi
+
+    cd "$HOME/CyberLab" || exit 1
+
+    if [ -d "$HOME/CyberLab/.venv" ]; then
+      source "$HOME/CyberLab/.venv/bin/activate"
+    fi
+
+    python3 "$HOME/CyberLab/modules/block_16_context_bridge.py" \
+      "$CLIENT_NAME" \
+      "$TARGET" \
+      "$PROFILE"
+
+    BLOCK16_RC=$?
+    if [ "$BLOCK16_RC" -ne 0 ]; then
+        exit "$BLOCK16_RC"
+    fi
+
+    echo ""
+    echo "[B17] Encadeando entrega final ao cliente..."
+    bash "$HOME/CyberLab/modules/client_final_delivery/block_17_final_client_delivery.sh"
+    exit $?
+    ;;
+  # === END_CYBERLAB_BLOCK16_CASES ===
+
+
+  help|"")
+    echo
+    echo "========================================"
+    echo " CYBERLAB UNIFIED"
+    echo "========================================"
+    echo
+    echo "Core:"
+    echo "  cyberlab status"
+    echo "  cyberlab sync-all"
+    echo "  cyberlab validate-all"
+    echo "  cyberlab health"
+    echo
+    echo "Clientes:"
+    echo "  cyberlab client add"
+    echo "  cyberlab client scan"
+    echo
+  
+  echo ""
+  echo "Blocos 12/13:"
+  echo "  cyberlab block12 <dominio>       -> Bloco 12: inteligência, score, falso positivo e superfície"
+  echo "  cyberlab block13 <dominio>       -> Bloco 13: relatórios MD/PDF, SLA e remediação"
+  echo "  cyberlab final <dominio>         -> roda Bloco 12 + Bloco 13 + validação final"
+  echo ""
+  # === CYBERLAB_BLOCK_12_13_HELP ===
+
+
+  echo ""
+
+  echo ""
+
+  echo ""
+
+  echo ""
+  echo "Auditoria com ferramentas integradas:"
+  echo "  cyberlab audit-tools <domínio> [perfil]           -> roda ferramentas controladas com escopo e auditoria"
+  echo "  cyberlab audit-tools-approved <domínio> [perfil]  -> roda perfil aprovado com ferramentas sensíveis"
+  echo "  Perfis: safe, active, active-plus, max-controlled"
+  echo ""
+  # === CYBERLAB_AUDIT_TOOLS_HELP ===
+
+  echo "Ferramentas ofensivas controladas:"
+  echo "  cyberlab tools-install          -> instala stack ofensiva do lab"
+  echo "  cyberlab tools-check            -> valida ferramentas instaladas"
+  echo ""
+  # === CYBERLAB_TOOLS_STACK_HELP ===
+
+  echo "Bloco 15 - Controlled Offensive Validation:"
+  echo "  cyberlab block15 <domínio> [modo]              -> valida impacto de forma segura"
+  echo "  cyberlab validate-impact <domínio> [modo]      -> alias do Bloco 15"
+  echo "  cyberlab active-plus <domínio>                 -> full-active + Bloco 14 + Bloco 15 active-plus"
+  echo "  cyberlab full-offensive-controlled <domínio>   -> fluxo máximo controlado com Bloco 15"
+  echo ""
+  # === CYBERLAB_BLOCK_15_HELP ===
+
+  echo "Bloco 14 - Validation Intelligence:"
+  echo "  cyberlab block14 <domínio>                 -> valida achados do Bloco 12 e gera insights úteis"
+  echo "  cyberlab validated-final <domínio>         -> roda final + Bloco 14"
+  echo "  cyberlab full-active-validated <domínio>   -> roda full-active + Bloco 14"
+  echo ""
+  # === CYBERLAB_BLOCK_14_HELP ===
+
+  echo "Scans:"
+    echo "  cyberlab web"
+    echo "  cyberlab lan"
+    echo "  cyberlab threat"
+    echo "  cyberlab detect"
+    echo "  cyberlab correlate"
+    echo "  cyberlab redteam"
+    echo
+    echo "Interface:"
+    echo "  cyberlab dashboard"
+    echo "  cyberlab monitor"
+    echo "  cyberlab menu"
+    echo
+
+        echo ""
+        echo "Higienização e manutenção:"
+        echo "   cyberlab cleanup-obsolete dry-run          -> simula limpeza segura de backups e artefatos obsoletos"
+        echo "   cyberlab cleanup-obsolete apply            -> move obsoletos para quarentena com manifesto"
+        echo "   cyberlab cleanup-status                    -> mostra o último relatório de limpeza"
+        # === CYBERLAB_CLEANUP_LAYER2_HELP ===
+
+        echo ""
+        echo "Fluxo integrado:"
+        echo "   cyberlab full-active <domínio>             -> fluxo completo com modo active integrado"
+        echo ""
+        echo ""
+echo "Camada 3 - Contexto oficial de auditoria:"
+echo "  cyberlab audit-context show       -> mostra cliente, alvo, scan oficial e artefatos"
+echo "  cyberlab audit-context validate   -> valida o contexto atual"
+echo "  cyberlab audit-context path       -> mostra o caminho do JSON de contexto"
+echo "  cyberlab audit-context json       -> imprime o JSON completo"
+# === CYBERLAB_LAYER3_AUDIT_CONTEXT_HELP ===
+
+echo ""
+echo "Bloco 17 - Entrega final sincronizada ao cliente:"
+echo "  cyberlab client-final-delivery [scan_dir]      -> roda 4A, 4A.1, 4B, 4C, 4C.1 e 4D com PDFs finais"
+echo "  cyberlab block17-final [scan_dir]              -> alias técnico da entrega final ao cliente"
+echo "  cyberlab block17 [scan_dir]                    -> alias curto do Bloco 17"
+# === CYBERLAB_BLOCK17_FINAL_DELIVERY_HELP ===
+
+echo "Bloco 16 - Unified Client Audit Orchestrator:"
+        echo '   cyberlab block16 "Cliente" <domínio> [perfil]                         -> executa auditoria unificada por cliente'
+        echo '   cyberlab client-audit-final-approved "Cliente" <domínio> [perfil]     -> alias da auditoria final sincronizada'
+        # === CYBERLAB_FULL_ACTIVE_AND_BLOCK16_HELP ===
+    echo ""
+    echo "Camada 4C.1 - Polimento editorial dos relatórios finais:"
+    echo "  cyberlab client-final-polish [scan_dir]    -> refina narrativa, priorização e linguagem final antes dos PDFs"
+    echo "  cyberlab block17-4c1 [scan_dir]            -> alias técnico da Camada 4C.1"
+    # === CYBERLAB_LAYER4C1_EDITORIAL_HELP ===
+    echo ""
+    echo "Camada 5 - Command Center e fluxo simplificado:"
+    echo "  cyberlab audit run \"Cliente\" dominio.com.br [perfil]   -> auditoria completa oficial"
+    echo "  cyberlab audit status                              -> mostra o contexto da auditoria atual"
+    echo "  cyberlab audit check                               -> health + validação + contexto"
+    echo "  cyberlab recon <ação> dominio.com.br              -> reconhecimento e inteligência manual"
+    echo "  cyberlab deliver build                             -> entrega final com PDFs"
+    echo "  cyberlab deliver latest                            -> mostra os artefatos finais mais recentes"
+    echo "  cyberlab maintain cleanup preview|apply|status     -> manutenção e quarentena"
+    echo "  cyberlab lab redteam|dashboard|monitor             -> ambiente e interfaces do lab"
+    # === CYBERLAB_COMMAND_CENTER_HELP ===
+        exit 0
+    ;;
+
+  status)
+    echo
+    echo "==== CYBERLAB STATUS ===="
+    echo "Home:   $CYBERLAB_HOME"
+    echo "User:   $USER"
+    echo "Host:   $(hostname)"
+    echo "Kernel: $(uname -r)"
+    echo
+    ;;
+
+
+  sync)
+    bash "$CYBERLAB_MODULES/core/sync-all.sh"
+    ;;
+
+  tools)
+    command -v nmap curl jq python3 git dig whois tmux docker nuclei subfinder httpx katana naabu
+    ;;
+
+  health)
+    bash "$CYBERLAB_MODULES/core/validate-all.sh"
+    ;;
+
+  sync-all)
+    bash "$CYBERLAB_MODULES/core/sync-all.sh"
+    ;;
+
+  validate-all)
+    bash "$CYBERLAB_MODULES/core/validate-all.sh"
+    ;;
+
+  health)
+    bash "$CYBERLAB_MODULES/health/health.sh" "$@"
+    ;;
+
+  web)
+    bash "$CYBERLAB_MODULES/web/web-scan.sh" "$@"
+    ;;
+
+  lan)
+    bash "$CYBERLAB_MODULES/lan/lan-scan.sh" "$@"
+    ;;
+
+  threat)
+    bash "$CYBERLAB_MODULES/threat/threat-engine.sh" "$@"
+    ;;
+
+  detect)
+    bash "$CYBERLAB_MODULES/detection/detection-engine.sh" "$@"
+    ;;
+
+  correlate)
+    bash "$HOME/CyberLab/modules/correlation/correlation.sh"
+    ;;
+
+  redteam)
+    bash "$CYBERLAB_MODULES/redteam/redteam.sh" "$@"
+    ;;
+
+  report)
+    bash "$HOME/CyberLab/modules/report/report-engine-enterprise.sh"
+    ;;
+
+
+  delivery)
+    bash "$CYBERLAB_CORE/delivery.sh" "$@"
+    ;;
+
+  client)
+    bash "$CYBERLAB_CORE/client.sh" "$@"
+    ;;
+
+  dashboard)
+    python3 "$CYBERLAB_WEB/dashboard.py"
+    ;;
+
+  dashboard-start)
+    nohup python3 "$CYBERLAB_WEB/dashboard.py" \
+      > "$CYBERLAB_LOGS/dashboard.log" 2>&1 &
+    echo "[OK] Dashboard iniciado"
+    ;;
+
+
+ 
+
+
+ menu)
+    bash "$CYBERLAB_UI/menu.sh"
+    ;;
+
+  monitor)
+    bash "$CYBERLAB_UI/monitor.sh"
+    ;;
+
+  labup)
+    bash "$CYBERLAB_MODULES/core/labup.sh"
+    ;;
+
+  validate-json)
+    bash "$HOME/CyberLab/modules/ops/validate-json.sh" "$@"
+    ;;
+op)
+    bash "$HOME/CyberLab/modules/operation/operation-v2.sh" "$@"
+    ;;
+
+db)
+    python3 "$HOME/CyberLab/modules/db/db-v2.py" "${1:-status}"
+    ;;
+
+scan)
+    bash "$HOME/CyberLab/modules/scan/scan-engine.sh" "${1:-}" "${2:-safe}"
+    ;;
+
+finding)
+    bash "$HOME/CyberLab/modules/finding/finding-engine.sh"
+    ;;
+
+gov)
+    bash "$HOME/CyberLab/modules/governance/governance.sh" "$@"
+    ;;
+
+
+scope)
+    bash "$HOME/CyberLab/modules/scope/scope.sh" "$@"
+    ;;
+
+
+policy)
+    bash "$HOME/CyberLab/modules/policy/policy.sh" "$@"
+    ;;
+
+
+guarded-run)
+    bash "$HOME/CyberLab/modules/policy/policy.sh" guarded-run "$@"
+    ;;
+
+runtime)
+    bash "$HOME/CyberLab/modules/runtime/runtime.sh" "$@"
+    ;;
+
+quality)
+    bash "$HOME/CyberLab/modules/quality/quality-gate.sh" "$@"
+    ;;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rbac)
+    bash "$HOME/CyberLab/modules/rbac/rbac.sh" "$@"
+    ;;
+
+evidence)
+    bash "$HOME/CyberLab/modules/evidence/evidence.sh" "$@"
+    ;;
+
+approval)
+    bash "$HOME/CyberLab/modules/approval/approval.sh" "$@"
+    ;;
+
+control)
+    bash "$HOME/CyberLab/modules/control/control.sh" "$@"
+    ;;
+
+queue)
+    bash "$HOME/CyberLab/modules/queue/queue.sh" "$@"
+    ;;
+
+
+active)
+    bash "$HOME/CyberLab/modules/active/active.sh" "$@"
+    ;;
+
+worker)
+    bash "$HOME/CyberLab/modules/worker/worker.sh" "$@"
+    ;;
+
+# === CYBERLAB_COMMAND_CENTER_CASES ===
+audit)
+    bash "$HOME/CyberLab/modules/core/command-center.sh" audit "$@"
+    exit $?
+    ;;
+
+recon)
+    bash "$HOME/CyberLab/modules/core/command-center.sh" recon "$@"
+    exit $?
+    ;;
+
+deliver)
+    bash "$HOME/CyberLab/modules/core/command-center.sh" deliver "$@"
+    exit $?
+    ;;
+
+maintain)
+    bash "$HOME/CyberLab/modules/core/command-center.sh" maintain "$@"
+    exit $?
+    ;;
+
+lab)
+    bash "$HOME/CyberLab/modules/core/command-center.sh" lab "$@"
+    exit $?
+    ;;
+# === END_CYBERLAB_COMMAND_CENTER_CASES ===
+
+*)
+    echo "[ERRO] comando desconhecido: $CMD"
+    echo "Use: cyberlab help"
+    exit 1
+    ;;
+
+esac
+
+
+
+
+
+
+
+

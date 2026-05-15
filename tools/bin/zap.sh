@@ -1,0 +1,1 @@
+/home/ph/.local/share/flatpak/app/org.zaproxy.ZAP/current/active/files/share/zap/zap.sh

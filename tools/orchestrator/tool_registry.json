@@ -1,0 +1,104 @@
+{
+  "version": "1.0",
+  "profiles": {
+    "safe": [
+      "nmap_safe",
+      "nikto_safe",
+      "wapiti_light",
+      "zap_baseline"
+    ],
+    "active": [
+      "nmap_safe",
+      "ffuf_controlled",
+      "gobuster_controlled",
+      "nikto_safe",
+      "wapiti_light",
+      "zap_baseline"
+    ],
+    "active-plus": [
+      "nmap_safe",
+      "ffuf_controlled",
+      "gobuster_controlled",
+      "nikto_safe",
+      "wapiti_light",
+      "zap_baseline",
+      "sqlmap_check"
+    ],
+    "max-controlled": [
+      "nmap_safe",
+      "ffuf_controlled",
+      "gobuster_controlled",
+      "nikto_safe",
+      "wapiti_light",
+      "zap_baseline",
+      "sqlmap_check",
+      "metasploit_check"
+    ]
+  },
+  "tools": {
+    "nmap_safe": {
+      "binary": "nmap",
+      "category": "network",
+      "risk": "low",
+      "requires_approval": false,
+      "timeout": 600,
+      "command": "nmap -sV --version-light -T2 --top-ports 100 --reason -oA {out}/nmap_safe {target}"
+    },
+    "nikto_safe": {
+      "binary": "nikto",
+      "category": "web",
+      "risk": "medium",
+      "requires_approval": false,
+      "timeout": 900,
+      "command": "nikto -h https://{target} -nointeractive -output {out}/nikto_safe.txt"
+    },
+    "wapiti_light": {
+      "binary": "wapiti",
+      "category": "web",
+      "risk": "medium",
+      "requires_approval": false,
+      "timeout": 1200,
+      "command": "wapiti -u https://{target} --scope domain -d 2 --max-scan-time 600 -f json -o {out}/wapiti_light.json"
+    },
+    "zap_baseline": {
+      "binary": "/home/ph/CyberLab/tools/bin/zap.sh",
+      "category": "web",
+      "risk": "medium",
+      "requires_approval": false,
+      "timeout": 1200,
+      "command": "{root}/tools/bin/zap.sh -cmd -quickurl https://{target} -quickout {out}/zap_baseline.html"
+    },
+    "ffuf_controlled": {
+      "binary": "ffuf",
+      "category": "web-discovery",
+      "risk": "medium",
+      "requires_approval": false,
+      "timeout": 900,
+      "command": "ffuf -u https://{target}/FUZZ -w {root}/tools/wordlists/SecLists/Discovery/Web-Content/common.txt -rate 20 -t 10 -mc all -fc 404 -of json -o {out}/ffuf_controlled.json"
+    },
+    "gobuster_controlled": {
+      "binary": "gobuster",
+      "category": "web-discovery",
+      "risk": "medium",
+      "requires_approval": false,
+      "timeout": 900,
+      "command": "gobuster dir -b 404,403,429 -u https://{target} -w {root}/tools/wordlists/SecLists/Discovery/Web-Content/common.txt -t 10 --delay 100ms -o {out}/gobuster_controlled.txt"
+    },
+    "sqlmap_check": {
+      "binary": "sqlmap",
+      "category": "injection-validation",
+      "risk": "high",
+      "requires_approval": true,
+      "timeout": 1200,
+      "command": "sqlmap -u https://{target}/ --batch --level 1 --risk 1 --smart --crawl=1 --forms --output-dir={out}/sqlmap --flush-session"
+    },
+    "metasploit_check": {
+      "binary": "msfconsole",
+      "category": "exploit-framework",
+      "risk": "high",
+      "requires_approval": true,
+      "timeout": 900,
+      "command": "msfconsole -q -x 'db_status; exit' > {out}/metasploit_check.txt"
+    }
+  }
+}

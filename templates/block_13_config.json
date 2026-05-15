@@ -1,0 +1,13 @@
+{
+  "version": "13.0",
+  "module": "CyberLab Delivery Enterprise",
+  "company_name": "CyberLab",
+  "report_author": "CyberLab Security",
+  "default_sla": {
+    "CRITICAL": "24 horas",
+    "HIGH": "72 horas",
+    "MEDIUM": "7 dias",
+    "LOW": "30 dias",
+    "INFO": "Revisao preventiva"
+  }
+}

@@ -1,0 +1,16 @@
+cloudflare
+google
+gstatic
+recaptcha
+facebook
+whatsapp
+cdn
+cdnjs
+jsdelivr
+bootstrapcdn
+fontawesome
+youtube
+googletagmanager
+google-analytics
+doubleclick
+schema.org

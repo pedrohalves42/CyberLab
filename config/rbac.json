@@ -1,0 +1,12 @@
+{
+  "roles": {
+    "admin": ["*"],
+    "operator": ["safe_run", "scan", "threat", "finding", "intelligence", "correlate", "report", "delivery", "quality"],
+    "auditor": ["read", "audit", "quality", "evidence"],
+    "viewer": ["read"]
+  },
+  "users": {
+    "ph": "admin"
+  },
+  "default_role": "viewer"
+}

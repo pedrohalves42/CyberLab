@@ -1,0 +1,4 @@
+{
+  "required": ["severity", "title", "description", "recommendation"],
+  "severity_allowed": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"]
+}

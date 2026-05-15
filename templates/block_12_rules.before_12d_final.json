@@ -1,0 +1,345 @@
+{
+  "version": "12.3-surface-intelligence",
+  "module": "CyberLab Intelligence Engine",
+  "rules": [
+    {
+      "id": "jwt_exposed",
+      "category": "JWT",
+      "title": "Possível JWT exposto",
+      "severity": "HIGH",
+      "confidence": 85,
+      "exposure": 80,
+      "impact_weight": 8,
+      "false_positive_weight": 30,
+      "patterns": [
+        "eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+"
+      ],
+      "impact": "Token JWT pode conter informações sensíveis ou permitir abuso caso esteja válido.",
+      "remediation": "Revogar tokens expostos, revisar logs e impedir exposição de tokens em páginas públicas."
+    },
+    {
+      "id": "secret_key_exposed",
+      "category": "SECRET",
+      "title": "Possível segredo ou chave exposta",
+      "severity": "HIGH",
+      "confidence": 80,
+      "exposure": 85,
+      "impact_weight": 9,
+      "false_positive_weight": 35,
+      "patterns": [
+        "api[_-]?key\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-]{16,}['\\\"]",
+        "x-api-key\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-]{16,}['\\\"]",
+        "secret\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-]{16,}['\\\"]",
+        "client_secret\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-]{16,}['\\\"]",
+        "access[_-]?token\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-\\.]{16,}['\\\"]",
+        "bearer\\s+[A-Za-z0-9_\\-\\.]{20,}",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY"
+      ],
+      "impact": "Chaves ou tokens podem permitir acesso indevido a APIs, integrações ou serviços internos.",
+      "remediation": "Revogar a chave, rotacionar credenciais e mover segredos para cofre seguro ou variáveis protegidas."
+    },
+    {
+      "id": "missing_hsts",
+      "category": "HEADER",
+      "title": "HSTS ausente",
+      "severity": "MEDIUM",
+      "confidence": 75,
+      "exposure": 60,
+      "impact_weight": 5,
+      "false_positive_weight": 50,
+      "patterns": [
+        "Strict-Transport-Security não encontrado",
+        "HSTS ausente",
+        "missing hsts",
+        "strict-transport-security missing"
+      ],
+      "impact": "A ausência de HSTS pode permitir downgrade para HTTP em cenários específicos.",
+      "remediation": "Configurar Strict-Transport-Security com max-age adequado, includeSubDomains e preload quando aplicável."
+    },
+    {
+      "id": "missing_csp",
+      "category": "HEADER",
+      "title": "Content-Security-Policy ausente",
+      "severity": "MEDIUM",
+      "confidence": 75,
+      "exposure": 65,
+      "impact_weight": 5,
+      "false_positive_weight": 50,
+      "patterns": [
+        "Content-Security-Policy não encontrado",
+        "CSP ausente",
+        "missing csp",
+        "content-security-policy missing"
+      ],
+      "impact": "A ausência de CSP aumenta o impacto de XSS e injeção de conteúdo.",
+      "remediation": "Implementar uma Content-Security-Policy compatível com o funcionamento do site."
+    },
+    {
+      "id": "admin_panel_exposed",
+      "category": "EXPOSED_PANEL",
+      "title": "Possível painel administrativo exposto",
+      "severity": "MEDIUM",
+      "confidence": 70,
+      "exposure": 75,
+      "impact_weight": 6,
+      "false_positive_weight": 45,
+      "patterns": [
+        "/admin",
+        "/wp-admin",
+        "/administrator",
+        "/painel",
+        "/dashboard",
+        "admin panel",
+        "login panel"
+      ],
+      "impact": "Painéis expostos aumentam a superfície de ataque e podem sofrer tentativas de acesso indevido.",
+      "remediation": "Restringir acesso por VPN, IP allowlist, MFA, rate limit e monitoramento."
+    },
+    {
+      "id": "api_endpoint_exposed",
+      "category": "API",
+      "title": "Possível endpoint de API exposto",
+      "severity": "LOW",
+      "confidence": 50,
+      "exposure": 60,
+      "impact_weight": 4,
+      "false_positive_weight": 75,
+      "patterns": [
+        "/api/",
+        "/graphql",
+        "swagger",
+        "openapi"
+      ],
+      "impact": "Endpoints de API públicos precisam de autenticação, autorização, rate limit e validação adequada.",
+      "remediation": "Revisar autenticação, autorização, rate limit, CORS e exposição de documentação."
+    },
+    {
+      "id": "sensitive_file",
+      "category": "SENSITIVE_FILE",
+      "title": "Possível arquivo sensível encontrado",
+      "severity": "HIGH",
+      "confidence": 75,
+      "exposure": 90,
+      "impact_weight": 9,
+      "false_positive_weight": 45,
+      "patterns": [
+        "(^|/|\\s)\\.env($|\\s|\\?|#|/)",
+        "(^|/|\\s)\\.git($|\\s|\\?|#|/)",
+        "(^|/|\\s)wp-config\\.php($|\\s|\\?|#|/)",
+        "(^|/|\\s)config\\.php($|\\s|\\?|#|/)",
+        "(^|/|\\s)database\\.yml($|\\s|\\?|#|/)",
+        "(^|/|\\s)backup\\.zip($|\\s|\\?|#|/)",
+        "(^|/|\\s)backup\\.sql($|\\s|\\?|#|/)",
+        "(^|/|\\s)dump\\.sql($|\\s|\\?|#|/)",
+        "(^|/|\\s)[A-Za-z0-9_-]+\\.bak($|\\s|\\?|#|/)",
+        "(^|/|\\s)[A-Za-z0-9_-]+\\.old($|\\s|\\?|#|/)"
+      ],
+      "impact": "Arquivos sensíveis podem conter senhas, tokens, backups ou configurações internas.",
+      "remediation": "Remover arquivos públicos, bloquear acesso por configuração do servidor e revisar histórico de exposição."
+    },
+    {
+      "id": "bucket_reference",
+      "category": "BUCKET",
+      "title": "Possível referência a bucket ou storage",
+      "severity": "MEDIUM",
+      "confidence": 65,
+      "exposure": 70,
+      "impact_weight": 6,
+      "false_positive_weight": 55,
+      "patterns": [
+        "s3\\.amazonaws\\.com",
+        "storage\\.googleapis\\.com",
+        "blob\\.core\\.windows\\.net",
+        "amazonaws.com/.+",
+        "bucket"
+      ],
+      "impact": "Buckets mal configurados podem expor arquivos, backups ou dados sensíveis.",
+      "remediation": "Validar permissões do bucket, bloquear acesso público e revisar políticas IAM."
+    },
+    {
+      "id": "exposed_port",
+      "category": "PORT",
+      "title": "Porta ou serviço exposto identificado",
+      "severity": "MEDIUM",
+      "confidence": 65,
+      "exposure": 70,
+      "impact_weight": 6,
+      "false_positive_weight": 60,
+      "patterns": [
+        "porta aberta",
+        "open port",
+        "tcp open",
+        "service detected"
+      ],
+      "impact": "Serviços expostos aumentam a superfície de ataque e precisam ser revisados conforme a necessidade real do ambiente.",
+      "remediation": "Validar se a porta precisa estar pública, aplicar firewall, restrição por IP, VPN ou hardening do serviço."
+    },
+    {
+      "id": "directory_listing",
+      "category": "EXPOSURE",
+      "title": "Possível listagem de diretório exposta",
+      "severity": "MEDIUM",
+      "confidence": 75,
+      "exposure": 80,
+      "impact_weight": 7,
+      "false_positive_weight": 40,
+      "patterns": [
+        "Index of /",
+        "directory listing",
+        "listagem de diretório"
+      ],
+      "impact": "Listagem de diretório pode revelar arquivos, backups, caminhos internos e informações sensíveis.",
+      "remediation": "Desabilitar directory listing no servidor web e revisar arquivos públicos."
+    },
+    {
+      "id": "phpinfo_exposed",
+      "category": "EXPOSURE",
+      "title": "Possível phpinfo exposto",
+      "severity": "HIGH",
+      "confidence": 80,
+      "exposure": 85,
+      "impact_weight": 8,
+      "false_positive_weight": 35,
+      "patterns": [
+        "phpinfo\\(\\)",
+        "PHP Version",
+        "System.*Build Date"
+      ],
+      "impact": "phpinfo exposto pode revelar versão do PHP, módulos, caminhos internos e variáveis do servidor.",
+      "remediation": "Remover arquivos phpinfo públicos e revisar exposição de informações técnicas."
+    },
+    {
+      "id": "server_status_exposed",
+      "category": "EXPOSURE",
+      "title": "Possível página de status do servidor exposta",
+      "severity": "HIGH",
+      "confidence": 75,
+      "exposure": 85,
+      "impact_weight": 8,
+      "false_positive_weight": 40,
+      "patterns": [
+        "/server-status",
+        "Apache Server Status",
+        "nginx status"
+      ],
+      "impact": "Páginas de status podem revelar requisições, IPs, caminhos e informações operacionais do servidor.",
+      "remediation": "Restringir acesso a páginas de status por IP, autenticação ou remover exposição pública."
+    },
+    {
+      "id": "weak_tls_reference",
+      "category": "TLS",
+      "title": "Possível configuração TLS fraca identificada",
+      "severity": "MEDIUM",
+      "confidence": 70,
+      "exposure": 65,
+      "impact_weight": 6,
+      "false_positive_weight": 50,
+      "patterns": [
+        "TLSv1.0",
+        "TLSv1.1",
+        "weak cipher",
+        "cipher weak",
+        "SSLv3"
+      ],
+      "impact": "Protocolos ou cifras antigas podem reduzir a segurança da comunicação criptografada.",
+      "remediation": "Desabilitar TLS antigo, remover cifras fracas e manter apenas protocolos modernos."
+    },
+    {
+      "id": "surface_cloudflare_waf_detected",
+      "category": "SURFACE_WAF",
+      "title": "WAF/CDN Cloudflare detectado",
+      "severity": "INFO",
+      "confidence": 90,
+      "exposure": 20,
+      "impact_weight": 1,
+      "false_positive_weight": 70,
+      "patterns": [
+        "behind Cloudflare",
+        "Cloudflare \\(Cloudflare Inc\\.\\) WAF",
+        "HTTPServer\\[cloudflare\\]",
+        "\\[Cloudflare",
+        "cf-ray",
+        "cf-cache-status",
+        "cdn-cgi/challenge-platform"
+      ],
+      "impact": "O alvo utiliza Cloudflare/CDN/WAF, o que reduz exposição direta, mas pode mascarar origem e alterar respostas do scan.",
+      "remediation": "Manter Cloudflare/WAF ativo, revisar regras de segurança, rate limit, proteção de login e exposição do servidor de origem."
+    },
+    {
+      "id": "surface_http_403",
+      "category": "SURFACE_HTTP",
+      "title": "Resposta HTTP 403 Forbidden identificada",
+      "severity": "INFO",
+      "confidence": 80,
+      "exposure": 25,
+      "impact_weight": 1,
+      "false_positive_weight": 80,
+      "patterns": [
+        "\\[403\\]",
+        "403 Forbidden",
+        "Title\\[403 Forbidden\\]"
+      ],
+      "impact": "O servidor respondeu com acesso proibido. Isso pode indicar bloqueio por WAF, regra de segurança ou restrição de acesso.",
+      "remediation": "Validar se o 403 é esperado, revisar regras de WAF/CDN e confirmar se áreas públicas e administrativas estão protegidas corretamente."
+    },
+    {
+      "id": "surface_port_inventory",
+      "category": "SURFACE_PORT",
+      "title": "Porta identificada na superfície do alvo",
+      "severity": "LOW",
+      "confidence": 70,
+      "exposure": 45,
+      "impact_weight": 2,
+      "false_positive_weight": 75,
+      "patterns": [
+        "^[A-Za-z0-9_.-]+:[0-9]{2,5}$"
+      ],
+      "impact": "Portas abertas fazem parte da superfície exposta e devem ser revisadas para confirmar se são necessárias.",
+      "remediation": "Validar a necessidade de cada porta, restringir serviços administrativos e aplicar firewall, WAF ou allowlist quando aplicável."
+    },
+    {
+      "id": "surface_login_paths",
+      "category": "SURFACE_AUTH",
+      "title": "Caminho de autenticação ou área de cliente identificado",
+      "severity": "LOW",
+      "confidence": 65,
+      "exposure": 50,
+      "impact_weight": 2,
+      "false_positive_weight": 80,
+      "patterns": [
+        "/login/?$",
+        "/meu-cadastro/?$",
+        "/meus-pedidos/?$",
+        "/esqueci-a-senha/?$",
+        "/novo-cadastro/?$",
+        "/carrinho-de-compra/?$"
+      ],
+      "impact": "Páginas de autenticação e área do cliente são pontos sensíveis e devem ter proteção contra abuso, força bruta e enumeração.",
+      "remediation": "Revisar MFA quando aplicável, rate limit, proteção contra brute force, mensagens de erro genéricas e monitoramento de tentativas."
+    },
+    {
+      "id": "surface_js_tracking",
+      "category": "SURFACE_SCRIPT",
+      "title": "Script público ou rastreamento identificado",
+      "severity": "INFO",
+      "confidence": 65,
+      "exposure": 20,
+      "impact_weight": 1,
+      "false_positive_weight": 85,
+      "patterns": [
+        "gtm\\.js",
+        "/main\\.js",
+        "/cdn-cgi/challenge-platform/scripts/"
+      ],
+      "impact": "Scripts públicos e integrações de terceiros fazem parte da superfície do site e podem influenciar segurança, privacidade e performance.",
+      "remediation": "Revisar scripts carregados, origem, integridade, permissões e impacto em privacidade e segurança."
+    }
+  ],
+  "includes": [
+    "12A Findings Intelligence",
+    "12B Risk Scoring",
+    "12C False Positive Review",
+    "12D Surface Intelligence"
+  ]
+}

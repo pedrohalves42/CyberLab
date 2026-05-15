@@ -1,0 +1,14 @@
+Olá, tudo bem?
+
+Estamos oferecendo um Diagnóstico de Segurança para Sites por R$250.
+
+A análise verifica:
+✔ exposição pública do site
+✔ headers de segurança
+✔ tecnologias expostas
+✔ possíveis pontos de melhoria
+✔ relatório profissional em PDF
+
+É uma análise controlada, sem invasão e sem afetar o site.
+
+Se quiser, posso te explicar como funciona.

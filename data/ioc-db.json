@@ -1,0 +1,53 @@
+{
+  "suspicious_headers": [
+    "x-powered-by",
+    "server",
+    "x-aspnet-version",
+    "x-generator"
+  ],
+  "missing_security_headers": [
+    "strict-transport-security",
+    "content-security-policy",
+    "x-frame-options",
+    "x-content-type-options",
+    "referrer-policy",
+    "permissions-policy"
+  ],
+  "sensitive_paths": [
+    "/admin",
+    "/login",
+    "/api",
+    "/debug",
+    "/internal",
+    "/dashboard",
+    "/panel",
+    "/config",
+    "/backup",
+    "/.env",
+    "/swagger",
+    "/graphql"
+  ],
+  "suspicious_ports": [
+    "21",
+    "22",
+    "23",
+    "25",
+    "3306",
+    "3389",
+    "5432",
+    "5900",
+    "6379",
+    "8080",
+    "8443",
+    "9000"
+  ],
+  "dangerous_extensions": [
+    ".env",
+    ".bak",
+    ".old",
+    ".sql",
+    ".zip",
+    ".tar.gz",
+    ".backup"
+  ]
+}

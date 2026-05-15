@@ -1,0 +1,440 @@
+{
+  "version": "12.4-shopify-cdn-calibrated",
+  "module": "CyberLab Intelligence Engine",
+  "rules": [
+    {
+      "id": "jwt_exposed",
+      "category": "JWT",
+      "title": "Possível JWT completo exposto",
+      "severity": "HIGH",
+      "confidence": 75,
+      "exposure": 75,
+      "impact_weight": 7,
+      "false_positive_weight": 55,
+      "patterns": [
+        "\\beyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\b",
+        "authorization[:= ]+bearer\\s+eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}"
+      ],
+      "impact": "JWT completo em local público pode conter claims sensíveis ou permitir abuso caso esteja válido.",
+      "remediation": "Confirmar se o token é válido, evitar exposição em URLs/logs e rotacionar tokens caso necessário."
+    },
+    {
+      "id": "secret_key_exposed",
+      "category": "SECRET",
+      "title": "Possível segredo ou chave exposta",
+      "severity": "HIGH",
+      "confidence": 80,
+      "exposure": 85,
+      "impact_weight": 9,
+      "false_positive_weight": 35,
+      "patterns": [
+        "api[_-]?key\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-]{16,}['\\\"]",
+        "x-api-key\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-]{16,}['\\\"]",
+        "secret\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-]{16,}['\\\"]",
+        "client_secret\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-]{16,}['\\\"]",
+        "access[_-]?token\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-\\.]{16,}['\\\"]",
+        "bearer\\s+[A-Za-z0-9_\\-\\.]{20,}",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY"
+      ],
+      "impact": "Chaves ou tokens podem permitir acesso indevido a APIs, integrações ou serviços internos.",
+      "remediation": "Revogar a chave, rotacionar credenciais e mover segredos para cofre seguro ou variáveis protegidas."
+    },
+    {
+      "id": "missing_hsts",
+      "category": "HEADER",
+      "title": "HSTS ausente",
+      "severity": "MEDIUM",
+      "confidence": 75,
+      "exposure": 60,
+      "impact_weight": 5,
+      "false_positive_weight": 50,
+      "patterns": [
+        "Strict-Transport-Security não encontrado",
+        "HSTS ausente",
+        "missing hsts",
+        "strict-transport-security missing"
+      ],
+      "impact": "A ausência de HSTS pode permitir downgrade para HTTP em cenários específicos.",
+      "remediation": "Configurar Strict-Transport-Security com max-age adequado, includeSubDomains e preload quando aplicável."
+    },
+    {
+      "id": "missing_csp",
+      "category": "HEADER",
+      "title": "Content-Security-Policy ausente",
+      "severity": "MEDIUM",
+      "confidence": 75,
+      "exposure": 65,
+      "impact_weight": 5,
+      "false_positive_weight": 50,
+      "patterns": [
+        "Content-Security-Policy não encontrado",
+        "CSP ausente",
+        "missing csp",
+        "content-security-policy missing"
+      ],
+      "impact": "A ausência de CSP aumenta o impacto de XSS e injeção de conteúdo.",
+      "remediation": "Implementar uma Content-Security-Policy compatível com o funcionamento do site."
+    },
+    {
+      "id": "admin_panel_exposed",
+      "category": "EXPOSED_PANEL",
+      "title": "Possível painel administrativo exposto",
+      "severity": "MEDIUM",
+      "confidence": 70,
+      "exposure": 75,
+      "impact_weight": 6,
+      "false_positive_weight": 45,
+      "patterns": [
+        "/admin",
+        "/wp-admin",
+        "/administrator",
+        "/painel",
+        "/dashboard",
+        "admin panel",
+        "login panel"
+      ],
+      "impact": "Painéis expostos aumentam a superfície de ataque e podem sofrer tentativas de acesso indevido.",
+      "remediation": "Restringir acesso por VPN, IP allowlist, MFA, rate limit e monitoramento."
+    },
+    {
+      "id": "api_endpoint_exposed",
+      "category": "SURFACE_API",
+      "title": "Endpoint de API identificado",
+      "severity": "LOW",
+      "confidence": 55,
+      "exposure": 45,
+      "impact_weight": 2,
+      "false_positive_weight": 85,
+      "patterns": [
+        "https?://[^\\s\\\"']+/api/[^\\s\\\"']+",
+        "https?://[^\\s\\\"']+/graphql",
+        "/api/",
+        "/graphql"
+      ],
+      "impact": "Endpoints de API são pontos de superfície que precisam de autenticação, autorização e rate limit.",
+      "remediation": "Revisar autenticação, autorização, CORS, rate limit e exposição de dados."
+    },
+    {
+      "id": "sensitive_file",
+      "category": "SENSITIVE_FILE",
+      "title": "Possível arquivo sensível encontrado",
+      "severity": "HIGH",
+      "confidence": 75,
+      "exposure": 80,
+      "impact_weight": 8,
+      "false_positive_weight": 45,
+      "patterns": [
+        "(^|/|\\s)\\.env($|\\s|\\?|#|&)",
+        "(^|/|\\s)\\.git/config($|\\s|\\?|#|&)",
+        "(^|/|\\s)wp-config\\.php($|\\s|\\?|#|&)",
+        "(^|/|\\s)config\\.php($|\\s|\\?|#|&)",
+        "(^|/|\\s)database\\.yml($|\\s|\\?|#|&)",
+        "(^|/|\\s)backup\\.zip($|\\s|\\?|#|&)",
+        "(^|/|\\s)backup\\.sql($|\\s|\\?|#|&)",
+        "(^|/|\\s)dump\\.sql($|\\s|\\?|#|&)",
+        "(^|/|\\s)[A-Za-z0-9_-]+\\.bak($|\\s|\\?|#|&)",
+        "(^|/|\\s)[A-Za-z0-9_-]+\\.old($|\\s|\\?|#|&)"
+      ],
+      "impact": "Arquivos sensíveis podem conter senhas, tokens, backups ou configurações internas.",
+      "remediation": "Remover arquivos públicos, bloquear acesso por configuração do servidor e revisar histórico de exposição."
+    },
+    {
+      "id": "bucket_reference",
+      "category": "BUCKET",
+      "title": "Possível bucket/storage sensível referenciado",
+      "severity": "MEDIUM",
+      "confidence": 60,
+      "exposure": 55,
+      "impact_weight": 5,
+      "false_positive_weight": 70,
+      "patterns": [
+        "s3\\.amazonaws\\.com/[^\\s\\\"']*(backup|dump|private|secret|database|db|export)[^\\s\\\"']*",
+        "[A-Za-z0-9_.-]+\\.s3\\.amazonaws\\.com/[^\\s\\\"']*(backup|dump|private|secret|database|db|export)[^\\s\\\"']*",
+        "storage\\.googleapis\\.com/[^\\s\\\"']*(backup|dump|private|secret|database|db|export)[^\\s\\\"']*",
+        "blob\\.core\\.windows\\.net/[^\\s\\\"']*(backup|dump|private|secret|database|db|export)[^\\s\\\"']*"
+      ],
+      "impact": "Referências a storage com nomes sensíveis podem indicar exposição de backups, exports ou dados privados.",
+      "remediation": "Validar permissões do bucket/storage, remover arquivos sensíveis públicos e revisar políticas de acesso."
+    },
+    {
+      "id": "exposed_port",
+      "category": "SURFACE_PORT",
+      "title": "Porta identificada na superfície do alvo",
+      "severity": "LOW",
+      "confidence": 60,
+      "exposure": 45,
+      "impact_weight": 2,
+      "false_positive_weight": 80,
+      "patterns": [
+        "^[A-Za-z0-9_.-]+:[0-9]{2,5}$",
+        "[0-9]+/tcp\\s+open",
+        "tcp\\s+open",
+        "open\\s+tcp\\s+[0-9]+"
+      ],
+      "impact": "Portas identificadas fazem parte da superfície exposta e devem ser revisadas para confirmar necessidade.",
+      "remediation": "Validar se a porta precisa estar pública e aplicar restrição, firewall ou allowlist quando aplicável."
+    },
+    {
+      "id": "directory_listing",
+      "category": "EXPOSURE",
+      "title": "Possível listagem de diretório exposta",
+      "severity": "MEDIUM",
+      "confidence": 75,
+      "exposure": 80,
+      "impact_weight": 7,
+      "false_positive_weight": 40,
+      "patterns": [
+        "Index of /",
+        "directory listing",
+        "listagem de diretório"
+      ],
+      "impact": "Listagem de diretório pode revelar arquivos, backups, caminhos internos e informações sensíveis.",
+      "remediation": "Desabilitar directory listing no servidor web e revisar arquivos públicos."
+    },
+    {
+      "id": "phpinfo_exposed",
+      "category": "EXPOSURE",
+      "title": "Possível phpinfo exposto",
+      "severity": "HIGH",
+      "confidence": 80,
+      "exposure": 85,
+      "impact_weight": 8,
+      "false_positive_weight": 35,
+      "patterns": [
+        "phpinfo\\(\\)",
+        "PHP Version",
+        "System.*Build Date"
+      ],
+      "impact": "phpinfo exposto pode revelar versão do PHP, módulos, caminhos internos e variáveis do servidor.",
+      "remediation": "Remover arquivos phpinfo públicos e revisar exposição de informações técnicas."
+    },
+    {
+      "id": "server_status_exposed",
+      "category": "EXPOSURE",
+      "title": "Possível página de status do servidor exposta",
+      "severity": "HIGH",
+      "confidence": 75,
+      "exposure": 85,
+      "impact_weight": 8,
+      "false_positive_weight": 40,
+      "patterns": [
+        "/server-status",
+        "Apache Server Status",
+        "nginx status"
+      ],
+      "impact": "Páginas de status podem revelar requisições, IPs, caminhos e informações operacionais do servidor.",
+      "remediation": "Restringir acesso a páginas de status por IP, autenticação ou remover exposição pública."
+    },
+    {
+      "id": "weak_tls_reference",
+      "category": "TLS",
+      "title": "Possível configuração TLS fraca identificada",
+      "severity": "MEDIUM",
+      "confidence": 70,
+      "exposure": 65,
+      "impact_weight": 6,
+      "false_positive_weight": 50,
+      "patterns": [
+        "TLSv1.0",
+        "TLSv1.1",
+        "weak cipher",
+        "cipher weak",
+        "SSLv3"
+      ],
+      "impact": "Protocolos ou cifras antigas podem reduzir a segurança da comunicação criptografada.",
+      "remediation": "Desabilitar TLS antigo, remover cifras fracas e manter apenas protocolos modernos."
+    },
+    {
+      "id": "surface_cloudflare_waf_detected",
+      "category": "SURFACE_WAF",
+      "title": "WAF/CDN Cloudflare detectado",
+      "severity": "INFO",
+      "confidence": 90,
+      "exposure": 20,
+      "impact_weight": 1,
+      "false_positive_weight": 70,
+      "patterns": [
+        "behind Cloudflare",
+        "Cloudflare \\(Cloudflare Inc\\.\\) WAF",
+        "HTTPServer\\[cloudflare\\]",
+        "\\[Cloudflare",
+        "Cloudflare Browser Insights",
+        "cf-ray",
+        "cf-cache-status",
+        "cdn-cgi/challenge-platform"
+      ],
+      "impact": "O alvo utiliza Cloudflare/CDN/WAF, o que reduz exposição direta, mas pode mascarar a origem e alterar respostas do scan.",
+      "remediation": "Manter Cloudflare/WAF ativo, revisar regras de segurança, rate limit, proteção de login e exposição do servidor de origem."
+    },
+    {
+      "id": "surface_http_403",
+      "category": "SURFACE_HTTP",
+      "title": "Resposta HTTP 403 Forbidden identificada",
+      "severity": "INFO",
+      "confidence": 80,
+      "exposure": 25,
+      "impact_weight": 1,
+      "false_positive_weight": 80,
+      "patterns": [
+        "\\[403\\]",
+        "403 Forbidden",
+        "Title\\[403 Forbidden\\]"
+      ],
+      "impact": "O servidor respondeu com acesso proibido. Isso pode indicar bloqueio por WAF, regra de segurança ou restrição de acesso.",
+      "remediation": "Validar se o 403 é esperado, revisar regras de WAF/CDN e confirmar se áreas públicas e administrativas estão protegidas corretamente."
+    },
+    {
+      "id": "surface_port_inventory",
+      "category": "SURFACE_PORT",
+      "title": "Porta identificada na superfície do alvo",
+      "severity": "LOW",
+      "confidence": 70,
+      "exposure": 45,
+      "impact_weight": 2,
+      "false_positive_weight": 75,
+      "patterns": [
+        "^[A-Za-z0-9_.-]+:[0-9]{2,5}$"
+      ],
+      "impact": "Portas abertas fazem parte da superfície exposta e devem ser revisadas para confirmar se são necessárias.",
+      "remediation": "Validar a necessidade de cada porta, restringir serviços administrativos e aplicar firewall, WAF ou allowlist quando aplicável."
+    },
+    {
+      "id": "surface_login_paths",
+      "category": "SURFACE_AUTH",
+      "title": "Caminho de autenticação ou área de cliente identificado",
+      "severity": "LOW",
+      "confidence": 65,
+      "exposure": 50,
+      "impact_weight": 2,
+      "false_positive_weight": 80,
+      "patterns": [
+        "https?://[^\\s]+/login/?$",
+        "https?://[^\\s]+/meu-cadastro/?$",
+        "https?://[^\\s]+/meus-pedidos/?$",
+        "https?://[^\\s]+/esqueci-a-senha/?$",
+        "https?://[^\\s]+/novo-cadastro/?$",
+        "https?://[^\\s]+/carrinho-de-compra/?$"
+      ],
+      "impact": "Páginas de autenticação e área do cliente são pontos sensíveis e devem ter proteção contra abuso, força bruta e enumeração.",
+      "remediation": "Revisar rate limit, proteção contra brute force, mensagens de erro genéricas, monitoramento de tentativas e MFA quando aplicável."
+    },
+    {
+      "id": "surface_js_tracking",
+      "category": "SURFACE_SCRIPT",
+      "title": "Script público ou rastreamento identificado",
+      "severity": "INFO",
+      "confidence": 65,
+      "exposure": 20,
+      "impact_weight": 1,
+      "false_positive_weight": 85,
+      "patterns": [
+        "gtm\\.js",
+        "/main\\.js",
+        "/cdn-cgi/challenge-platform/scripts/"
+      ],
+      "impact": "Scripts públicos e integrações de terceiros fazem parte da superfície do site e podem influenciar segurança, privacidade e performance.",
+      "remediation": "Revisar scripts carregados, origem, integridade, permissões e impacto em privacidade e segurança."
+    },
+    {
+      "id": "surface_tech_fingerprint",
+      "category": "SURFACE_TECH",
+      "title": "Tecnologia ou fingerprint público identificado",
+      "severity": "INFO",
+      "confidence": 70,
+      "exposure": 25,
+      "impact_weight": 1,
+      "false_positive_weight": 85,
+      "patterns": [
+        "HTTPServer\\[[^\\]]+\\]",
+        "Country\\[[^\\]]+\\]",
+        "IP\\[[0-9\\.]+\\]",
+        "UncommonHeaders\\[[^\\]]+\\]"
+      ],
+      "impact": "Fingerprints públicos ajudam a contextualizar a superfície exposta, mas não representam vulnerabilidade isoladamente.",
+      "remediation": "Reduzir exposição desnecessária de banners, revisar headers incomuns e manter serviços atualizados."
+    },
+    {
+      "id": "surface_headers_observed",
+      "category": "SURFACE_HEADER",
+      "title": "Headers ou metadados públicos observados",
+      "severity": "INFO",
+      "confidence": 65,
+      "exposure": 20,
+      "impact_weight": 1,
+      "false_positive_weight": 85,
+      "patterns": [
+        "UncommonHeaders\\[[^\\]]+\\]",
+        "alt-svc",
+        "report-to",
+        "nel",
+        "cf-cache-status",
+        "cf-ray"
+      ],
+      "impact": "Headers públicos podem revelar detalhes operacionais do CDN/WAF e comportamento de cache.",
+      "remediation": "Revisar headers expostos, políticas de cache e configurações do CDN/WAF."
+    },
+    {
+      "id": "surface_encoded_state_token",
+      "category": "SURFACE_TOKEN",
+      "title": "Token ou estado codificado observado em URL",
+      "severity": "LOW",
+      "confidence": 65,
+      "exposure": 45,
+      "impact_weight": 2,
+      "false_positive_weight": 80,
+      "patterns": [
+        "buyer_flags=eyJ[A-Za-z0-9_\\-%.]+",
+        "locale=[^\\s&]+&buyer_flags=eyJ[A-Za-z0-9_\\-%.]+",
+        "[?&][A-Za-z0-9_\\-]*(token|state|flags|session)[A-Za-z0-9_\\-]*=eyJ[A-Za-z0-9_\\-%.]+"
+      ],
+      "impact": "Parâmetros codificados em URL podem representar estado de aplicação, preferências ou dados de sessão. Não confirmam vulnerabilidade isoladamente.",
+      "remediation": "Validar se o conteúdo não carrega dados sensíveis, evitar tokens longos em URL quando possível e preferir armazenamento seguro/cookies com atributos adequados."
+    },
+    {
+      "id": "surface_shopify_api_graphql",
+      "category": "SURFACE_API",
+      "title": "Endpoint de API/GraphQL de plataforma identificado",
+      "severity": "LOW",
+      "confidence": 65,
+      "exposure": 45,
+      "impact_weight": 2,
+      "false_positive_weight": 85,
+      "patterns": [
+        "myshopify\\.com",
+        "shopify",
+        "/api/",
+        "/graphql",
+        "cdn\\.shopify\\.com",
+        "shopifycloud"
+      ],
+      "impact": "Endpoints e integrações de plataforma fazem parte da superfície do e-commerce e devem ser revisados quanto a autenticação, rate limit e exposição indevida.",
+      "remediation": "Validar autenticação, permissões, CORS, rate limit e exposição de dados sensíveis nas APIs."
+    },
+    {
+      "id": "surface_cdn_storage_asset",
+      "category": "SURFACE_CDN",
+      "title": "Asset público servido por CDN/storage",
+      "severity": "INFO",
+      "confidence": 70,
+      "exposure": 30,
+      "impact_weight": 1,
+      "false_positive_weight": 90,
+      "patterns": [
+        "amazonaws\\.com/Storefront/[^\\s\\\"']+",
+        "amazonaws\\.com/[^\\s\\\"']+\\.(css|js|png|jpg|jpeg|webp|svg|woff|woff2)",
+        "cdn\\.shopify\\.com/[^\\s\\\"']+",
+        "cdn/shop/[^\\s\\\"']+"
+      ],
+      "impact": "Assets públicos em CDN/storage são comuns em e-commerce e não representam falha isoladamente.",
+      "remediation": "Confirmar que apenas assets públicos estão expostos e que não há arquivos sensíveis, backups ou dados privados no storage."
+    }
+  ],
+  "includes": [
+    "12A Findings Intelligence",
+    "12B Risk Scoring",
+    "12C False Positive Review",
+    "12D Surface Intelligence"
+  ],
+  "notes": "Calibração para reduzir falsos positivos de JWT parcial, buyer_flags, Shopify, CDN e assets públicos."
+}

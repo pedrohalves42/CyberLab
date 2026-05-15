@@ -1,0 +1,23 @@
+{
+  "severity_score": {
+    "CRITICAL": 100,
+    "HIGH": 80,
+    "MEDIUM": 55,
+    "LOW": 25,
+    "INFO": 5
+  },
+  "confidence": {
+    "HEADER": 90,
+    "PORT": 80,
+    "THREAT": 75,
+    "FINGERPRINT": 65,
+    "GENERIC": 60
+  },
+  "business_weight": {
+    "public_web": 1.2,
+    "admin": 1.5,
+    "auth": 1.4,
+    "payment": 1.7,
+    "default": 1.0
+  }
+}
