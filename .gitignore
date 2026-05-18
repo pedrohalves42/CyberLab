@@ -35,3 +35,10 @@ queue/pending/
 queue/running/
 queue/completed/
 queue/failed/
+
+# ============================================================
+# Python runtime / bytecode — não versionar
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
