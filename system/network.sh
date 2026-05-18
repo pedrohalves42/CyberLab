@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 network_status() {
   echo "==== CYBERLAB NETWORK STATUS ===="

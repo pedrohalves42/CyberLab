@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 apt_status() {
   echo "==== CYBERLAB APT STATUS ===="

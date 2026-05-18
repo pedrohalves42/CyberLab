@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 CURRENT="$BASE/state/current-operation.txt"
 OP="$(cat "$CURRENT" 2>/dev/null || true)"
 CMD="${1:-help}"

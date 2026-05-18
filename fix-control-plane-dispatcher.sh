@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 BIN="$BASE/bin/cyberlab"
 
 echo "==== FIX CONTROL PLANE DISPATCHER ===="
@@ -17,35 +17,35 @@ blocks = {
 "evidence": '''
 evidence)
     shift
-    bash "$HOME/CyberLab/modules/evidence/evidence.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/evidence/evidence.sh" "$@"
     ;;
 ''',
 
 "rbac": '''
 rbac)
     shift
-    bash "$HOME/CyberLab/modules/rbac/rbac.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/rbac/rbac.sh" "$@"
     ;;
 ''',
 
 "approval": '''
 approval)
     shift
-    bash "$HOME/CyberLab/modules/approval/approval.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/approval/approval.sh" "$@"
     ;;
 ''',
 
 "queue": '''
 queue)
     shift
-    bash "$HOME/CyberLab/modules/queue/queue.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/queue/queue.sh" "$@"
     ;;
 ''',
 
 "control": '''
 control)
     shift
-    bash "$HOME/CyberLab/modules/control/control.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/control/control.sh" "$@"
     ;;
 '''
 }
@@ -71,5 +71,5 @@ echo
 echo "[OK] Fix aplicado"
 echo
 echo "Recarregue:"
-echo "source ~/CyberLab/core/bootstrap.sh"
+echo "source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh""
 echo "hash -r"

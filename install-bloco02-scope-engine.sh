@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB BLOCO 02 — SCOPE ENGINE ENTERPRISE ===="
 
@@ -13,7 +13,7 @@ cat > "$BASE/modules/scope/scope.sh" <<'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 CURRENT="$BASE/state/current-operation.txt"
 
@@ -276,7 +276,7 @@ s = p.read_text()
 
 block = '''
 scope)
-    bash "$HOME/CyberLab/modules/scope/scope.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/scope/scope.sh" "$@"
     ;;
 '''
 
@@ -298,7 +298,7 @@ echo "[OK] BLOCO 02 Scope Engine instalado"
 echo
 echo "Fluxo de teste:"
 echo
-echo "source ~/CyberLab/core/bootstrap.sh"
+echo "source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh""
 echo "hash -r"
 echo
 echo "cyberlab scope show"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== REBUILD CONTROL PLANE MODULES ===="
 
@@ -36,7 +36,7 @@ cat > "$BASE/modules/rbac/rbac.sh" <<'RBAC'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 RBAC="$BASE/config/rbac.json"
 
 CMD="${1:-help}"
@@ -80,7 +80,7 @@ cat > "$BASE/modules/evidence/evidence.sh" <<'EVIDENCE'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 CURRENT="$BASE/state/current-operation.txt"
 OP="$(cat "$CURRENT" 2>/dev/null || true)"
 
@@ -129,7 +129,7 @@ cat > "$BASE/modules/approval/approval.sh" <<'APPROVAL'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 CURRENT="$BASE/state/current-operation.txt"
 OP="$(cat "$CURRENT" 2>/dev/null || true)"
 
@@ -192,7 +192,7 @@ cat > "$BASE/modules/control/control.sh" <<'CONTROL'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 CURRENT="$BASE/state/current-operation.txt"
 OP="$(cat "$CURRENT" 2>/dev/null || true)"
 CMD="${1:-help}"
@@ -242,7 +242,7 @@ cat > "$BASE/modules/queue/queue.sh" <<'QUEUE'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 QUEUE="$BASE/queue"
 
 mkdir -p "$QUEUE/pending" "$QUEUE/running" "$QUEUE/finished" "$QUEUE/failed"

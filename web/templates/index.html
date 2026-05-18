@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Dashboard Geral</h2>
+
+<div class="grid">
+  <div class="card"><strong>{{ total }}</strong><span>Scans</span></div>
+  <div class="card"><strong>{{ clients }}</strong><span>Clientes</span></div>
+  <div class="card"><strong>{{ targets }}</strong><span>Alvos</span></div>
+  <div class="card danger"><strong>{{ high_or_more }}</strong><span>Alto/Crítico</span></div>
+</div>
+
+<h3>Histórico de Scans</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Cliente</th>
+      <th>Alvo</th>
+      <th>Modo</th>
+      <th>Score</th>
+      <th>Nível</th>
+      <th>Achados</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in scans %}
+    <tr>
+      <td>{{ s.client }}</td>
+      <td>{{ s.target }}</td>
+      <td>{{ s.mode }}</td>
+      <td>{{ s.score }}</td>
+      <td><span class="badge {{ s.level|lower }}">{{ s.level }}</span></td>
+      <td>
+        C: {{ s.critical }} |
+        A: {{ s.high }} |
+        M: {{ s.medium }} |
+        B: {{ s.low }}
+      </td>
+      <td>
+        <a href="/view?path={{ s.path }}">Abrir</a>
+        <a href="/file?path={{ s.path }}&name=html" target="_blank">HTML</a>
+        <a href="/file?path={{ s.path }}&name=pdf" target="_blank">PDF</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

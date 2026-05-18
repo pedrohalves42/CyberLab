@@ -1,9 +1,9 @@
 #!/bin/bash
 set -u
 
-LOG="$HOME/CyberLab/tools/logs/install_offensive_stack_$(date +%Y%m%d_%H%M%S).log"
+LOG="$CYBERLAB_HOME/tools/logs/install_offensive_stack_$(date +%Y%m%d_%H%M%S).log"
 
-mkdir -p "$HOME/CyberLab/tools/logs" "$HOME/CyberLab/tools/bin"
+mkdir -p "$CYBERLAB_HOME/tools/logs" "$CYBERLAB_HOME/tools/bin"
 
 exec > >(tee -a "$LOG") 2>&1
 
@@ -111,7 +111,7 @@ fi
 echo ""
 echo "[8/8] Criando verificador de ferramentas..."
 
-cat > "$HOME/CyberLab/tools/offensive_tools_check.sh" << 'SH'
+cat > "$CYBERLAB_HOME/tools/offensive_tools_check.sh" << 'SH'
 #!/bin/bash
 
 echo "============================================================"
@@ -163,7 +163,7 @@ echo " então nem sempre aparecem com comando simples no PATH."
 echo "============================================================"
 SH
 
-chmod +x "$HOME/CyberLab/tools/offensive_tools_check.sh"
+chmod +x "$CYBERLAB_HOME/tools/offensive_tools_check.sh"
 
 echo ""
 echo "============================================================"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BIN="$HOME/CyberLab/bin/cyberlab"
+BIN="$CYBERLAB_HOME/bin/cyberlab"
 
 echo "==== FIX DISPATCHER CONTROL PLANE V3 ===="
 
@@ -18,23 +18,23 @@ for cmd in ["rbac", "evidence", "approval", "control", "queue"]:
 
 blocks = '''
 rbac)
-    bash "$HOME/CyberLab/modules/rbac/rbac.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/rbac/rbac.sh" "$@"
     ;;
 
 evidence)
-    bash "$HOME/CyberLab/modules/evidence/evidence.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/evidence/evidence.sh" "$@"
     ;;
 
 approval)
-    bash "$HOME/CyberLab/modules/approval/approval.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/approval/approval.sh" "$@"
     ;;
 
 control)
-    bash "$HOME/CyberLab/modules/control/control.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/control/control.sh" "$@"
     ;;
 
 queue)
-    bash "$HOME/CyberLab/modules/queue/queue.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/queue/queue.sh" "$@"
     ;;
 '''
 

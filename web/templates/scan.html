@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Novo Scan</h2>
+
+<div class="panel">
+  <form method="POST" action="/scan/run">
+    <label>Cliente</label>
+    <input name="client" placeholder="CyberShield" required>
+
+    <label>Alvo</label>
+    <input name="target" placeholder="cybshield.com.br" required>
+
+    <label>Modo</label>
+    <select name="mode">
+      <option value="safe">safe</option>
+      <option value="max">max</option>
+      <option value="lab">lab</option>
+    </select>
+
+    <button type="submit">Iniciar Scan</button>
+  </form>
+</div>
+
+<p class="note">
+  O alvo precisa estar autorizado em <code>~/CyberLab/config/scope.txt</code>.
+</p>
+{% endblock %}

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB BLOCO 10 — ACTIVE MODE ENGINE + QUEUE WORKER ===="
 
@@ -51,7 +51,7 @@ cat > "$BASE/modules/active/active.sh" <<'ACTIVE'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 OUTBASE="$BASE/results/active"
 WORDLIST="$BASE/data/wordlists/active-small.txt"
 
@@ -257,7 +257,7 @@ cat > "$BASE/modules/worker/worker.sh" <<'WORKER'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 QUEUE="$BASE/queue"
 
 mkdir -p "$QUEUE/pending" "$QUEUE/running" "$QUEUE/finished" "$QUEUE/failed"
@@ -354,11 +354,11 @@ for cmd in ["active", "worker"]:
 
 blocks = '''
 active)
-    bash "$HOME/CyberLab/modules/active/active.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/active/active.sh" "$@"
     ;;
 
 worker)
-    bash "$HOME/CyberLab/modules/worker/worker.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/worker/worker.sh" "$@"
     ;;
 '''
 
@@ -377,7 +377,7 @@ echo
 echo "[OK] Bloco 10 Active Mode + Worker instalado"
 echo
 echo "Validação:"
-echo "source ~/CyberLab/core/bootstrap.sh"
+echo "source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh""
 echo "hash -r"
 echo "cyberlab active run \"CyberShield\" cybshield.com.br active"
 echo "cyberlab queue add \"CyberShield\" cybshield.com.br active"

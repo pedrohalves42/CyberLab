@@ -2,7 +2,7 @@
 
 set -u
 
-CYBERLAB_HOME="$HOME/CyberLab"
+CYBERLAB_HOME="$CYBERLAB_HOME"
 
 mkdir -p \
   "$CYBERLAB_HOME/core" \
@@ -19,7 +19,7 @@ echo "==== CYBERLAB BLOCO 16 SYNC CORE ===="
 cat > "$CYBERLAB_HOME/core/bootstrap.sh" <<'EOS'
 #!/bin/bash
 
-export CYBERLAB_HOME="$HOME/CyberLab"
+export CYBERLAB_HOME="$CYBERLAB_HOME"
 export CYBERLAB_BIN="$CYBERLAB_HOME/bin"
 export CYBERLAB_CORE="$CYBERLAB_HOME/core"
 export CYBERLAB_MODULES="$CYBERLAB_HOME/modules"
@@ -110,7 +110,7 @@ cat > "$CYBERLAB_HOME/modules/core/sync-all.sh" <<'EOS'
 
 set -u
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 LOG="$CYBERLAB_LOGS/sync-all.log"
 
@@ -274,7 +274,7 @@ cat > "$CYBERLAB_HOME/modules/core/validate-all.sh" <<'EOS'
 
 set -u
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 echo
 echo "========================================"
@@ -361,7 +361,7 @@ p = Path.home() / "CyberLab/bin/cyberlab"
 if not p.exists():
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text("""#!/bin/bash
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 case "$1" in
   status)
@@ -406,14 +406,14 @@ PY
 chmod +x "$CYBERLAB_HOME/bin/cyberlab"
 
 if ! grep -q 'CyberLab/core/bootstrap.sh' "$HOME/.zshrc" 2>/dev/null; then
-  echo 'source ~/CyberLab/core/bootstrap.sh' >> "$HOME/.zshrc"
+  echo 'source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"' >> "$HOME/.zshrc"
 fi
 
 echo
 echo "[OK] Bloco 16 Sync Core instalado"
 echo
 echo "Agora rode:"
-echo "source ~/CyberLab/core/bootstrap.sh"
+echo "source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh""
 echo "cyberlab sync-all"
 echo "cyberlab validate-all"
 echo

@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 ###############################################################################
 # HELPERS

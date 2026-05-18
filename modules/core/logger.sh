@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 
-LOG_DIR="$HOME/CyberLab/logs"
+LOG_DIR="$CYBERLAB_HOME/logs"
 mkdir -p "$LOG_DIR"
 
 log_event() {

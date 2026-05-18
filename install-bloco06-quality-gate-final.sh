@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB BLOCO 06 — QUALITY GATE FINAL ===="
 
@@ -14,7 +14,7 @@ cat > "$BASE/modules/quality/quality-gate.sh" <<'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 CURRENT="$BASE/state/current-operation.txt"
 
 now() {
@@ -283,7 +283,7 @@ p = Path.home() / "CyberLab/bin/cyberlab"
 s = p.read_text()
 
 block = '''quality)
-    bash "$HOME/CyberLab/modules/quality/quality-gate.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/quality/quality-gate.sh" "$@"
     ;;
 '''
 
@@ -303,6 +303,6 @@ echo
 echo "[OK] Bloco 06 Quality Gate Final instalado"
 echo
 echo "Validação:"
-echo "source ~/CyberLab/core/bootstrap.sh"
+echo "source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh""
 echo "hash -r"
 echo "cyberlab quality gate \"CyberShield\""

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 OUT="$CYBERLAB_RESULTS/redteam/redteam-$(timestamp)"
 mkdir -p "$OUT"/{mitre,detections,emulation,report,json}

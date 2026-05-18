@@ -1,110 +1,37 @@
-# =========================
-# Python
-# =========================
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
 
-# =========================
-# Virtual environments
-# =========================
-.venv/
-venv/
-env/
+# ============================================================
+# Configurações operacionais locais — não versionar
+# ============================================================
+config/scope.txt
+config/rbac.json
 
-# =========================
-# Logs / temporários
-# =========================
-*.log
-*.tmp
-*.swp
-*.swo
-tmp/
-.tmp/
-cache/
+# ============================================================
+# Fila operacional/runtime — não versionar
+# ============================================================
+queue/pending/
+queue/running/
+queue/completed/
+queue/failed/
 
-# =========================
-# Backups locais
-# =========================
-*.bak
-*.bak.*
-*.backup
+# ============================================================
+# Arquivos de arquivo histórico/local — não versionar
+# ============================================================
+archive/
 *.backup.*
-*.old
-*.orig
-backups/
-quarantine/
+*.bak.*
+*.before_*
+*.broken-archived-*
 
-# =========================
-# Resultados e evidências
-# =========================
-results/
-clients/
-operations/
+# ============================================================
+# Configuração local operacional — não versionar
+# ============================================================
+config/scope.txt
+config/rbac.json
 
-# =========================
-# Estados gerados em runtime
-# =========================
-state/audit/
-state/intelligence/
-state/reports/
-state/tmp/
-
-# =========================
-# Saídas de ferramentas
-# =========================
-*.pdf
-*.html
-*.csv
-*.tsv
-*.jsonl
-
-# =========================
-# Segredos e ambiente
-# =========================
-.env
-.env.*
-*.pem
-*.key
-*.crt
-secrets/
-credentials/
-
-# =========================
-# Ferramentas / wordlists externas clonadas
-# =========================
-SecLists/
-ffuf/
-nuclei/
-nuclei-templates/
-powerlevell0k/
-tools/setoolkit/
-
-# =========================
-# Sistema / editor
-# =========================
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-
-# =========================
-# Wordlists externas pesadas dentro do CyberLab
-# =========================
-tools/wordlists/SecLists/
-
-# =========================
-# Estados adicionais gerados em runtime
-# =========================
-state/current-operation.txt
-state/lab.state
-state/latest.json
-state/assets/
-state/findings/
-state/timeline/
-state/analytics/
-state/cleanup/
+# ============================================================
+# Filas runtime — não versionar
+# ============================================================
+queue/pending/
+queue/running/
+queue/completed/
+queue/failed/

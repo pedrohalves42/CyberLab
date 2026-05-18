@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 
-TARGET="${1:-$HOME/CyberLab/state/intelligence}"
+TARGET="${1:-$CYBERLAB_HOME/state/intelligence}"
 
 BROKEN=0
 

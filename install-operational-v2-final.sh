@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB OPERATION + SQLITE V2 FINAL ===="
 
@@ -18,7 +18,7 @@ cat > "$BASE/modules/operation/operation-v2.sh" <<'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 OPS="$BASE/operations"
 CURRENT="$BASE/state/current-operation.txt"
 
@@ -460,12 +460,12 @@ def upsert_case(src, name, block):
     return src + "\n" + block
 
 op_block = '''op)
-    bash "$HOME/CyberLab/modules/operation/operation-v2.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/operation/operation-v2.sh" "$@"
     ;;
 '''
 
 db_block = '''db)
-    python3 "$HOME/CyberLab/modules/db/db-v2.py" "${1:-status}"
+    python3 "$CYBERLAB_HOME/modules/db/db-v2.py" "${1:-status}"
     ;;
 '''
 
@@ -480,7 +480,7 @@ chmod +x "$BASE/bin/cyberlab"
 echo "[OK] Operational V2 Final instalado"
 echo
 echo "Fluxo recomendado:"
-echo "source ~/CyberLab/core/bootstrap.sh"
+echo "source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh""
 echo "hash -r"
 echo "cyberlab op run \"Loja Maromba\" lojamaromba.com safe"
 echo "cyberlab db status"

@@ -1,2 +1,0 @@
-# CyberLab
-CyberLab Pentest

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB BLOCO 03 — POLICY ENGINE ===="
 
@@ -14,7 +14,7 @@ cat > "$BASE/modules/policy/policy.sh" <<'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 CURRENT="$BASE/state/current-operation.txt"
 
 now(){ date -Iseconds; }
@@ -334,13 +334,13 @@ s = p.read_text()
 
 policy_block = '''
 policy)
-    bash "$HOME/CyberLab/modules/policy/policy.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/policy/policy.sh" "$@"
     ;;
 '''
 
 guarded_block = '''
 guarded-run)
-    bash "$HOME/CyberLab/modules/policy/policy.sh" guarded-run "$@"
+    bash "$CYBERLAB_HOME/modules/policy/policy.sh" guarded-run "$@"
     ;;
 '''
 
@@ -364,7 +364,7 @@ echo
 echo "[OK] BLOCO 03 Policy Engine instalado"
 echo
 echo "Validação recomendada:"
-echo "source ~/CyberLab/core/bootstrap.sh"
+echo "source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh""
 echo "hash -r"
 echo "cyberlab policy show"
 echo "cyberlab policy mode safe"

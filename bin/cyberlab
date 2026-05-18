@@ -1,11 +1,17 @@
 #!/bin/bash
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 CMD="$1"
 shift || true
 
 case "$CMD" in
+
+
+  init)
+    bash "$CYBERLAB_CORE/init.sh"
+    ;;
+
 
   run-basic)
     bash "$CYBERLAB_MODULES/ops/run-basic.sh" "$@"
@@ -29,7 +35,7 @@ case "$CMD" in
 
 
   intelligence)
-    bash "$HOME/CyberLab/modules/intelligence/unified-intelligence.sh"
+    bash "$CYBERLAB_HOME/modules/intelligence/unified-intelligence.sh"
     ;;
 
   risk)
@@ -68,10 +74,10 @@ case "$CMD" in
       exit 1
     fi
 
-    cd "$HOME/CyberLab" || exit 1
+    cd "$CYBERLAB_HOME" || exit 1
 
-    if [ -d "$HOME/CyberLab/.venv" ]; then
-      source "$HOME/CyberLab/.venv/bin/activate"
+    if [ -d "$CYBERLAB_HOME/.venv" ]; then
+      source "$CYBERLAB_HOME/.venv/bin/activate"
     fi
 
     echo ""
@@ -92,10 +98,10 @@ case "$CMD" in
       exit 1
     fi
 
-    cd "$HOME/CyberLab" || exit 1
+    cd "$CYBERLAB_HOME" || exit 1
 
-    if [ -d "$HOME/CyberLab/.venv" ]; then
-      source "$HOME/CyberLab/.venv/bin/activate"
+    if [ -d "$CYBERLAB_HOME/.venv" ]; then
+      source "$CYBERLAB_HOME/.venv/bin/activate"
     fi
 
     echo ""
@@ -116,10 +122,10 @@ case "$CMD" in
       exit 1
     fi
 
-    cd "$HOME/CyberLab" || exit 1
+    cd "$CYBERLAB_HOME" || exit 1
 
-    if [ -d "$HOME/CyberLab/.venv" ]; then
-      source "$HOME/CyberLab/.venv/bin/activate"
+    if [ -d "$CYBERLAB_HOME/.venv" ]; then
+      source "$CYBERLAB_HOME/.venv/bin/activate"
     fi
 
     echo ""
@@ -151,7 +157,7 @@ case "$CMD" in
     echo "============================================================"
     python3 modules/block_13_delivery.py --target "$TARGET" || exit 1
 
-    LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+    LATEST_SCAN="$(ls -td "$CYBERLAB_HOME/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
 
     if [ -z "$LATEST_SCAN" ]; then
       echo "[ERRO] Não foi possível localizar a última pasta de scan."
@@ -226,10 +232,10 @@ PY2
       exit 1
     fi
 
-    cd "$HOME/CyberLab" || exit 1
+    cd "$CYBERLAB_HOME" || exit 1
 
-    if [ -d "$HOME/CyberLab/.venv" ]; then
-      source "$HOME/CyberLab/.venv/bin/activate"
+    if [ -d "$CYBERLAB_HOME/.venv" ]; then
+      source "$CYBERLAB_HOME/.venv/bin/activate"
     fi
 
     echo ""
@@ -255,34 +261,34 @@ PY2
     echo "============================================================"
     echo " 01/13 Health"
     echo "============================================================"
-    "$HOME/CyberLab/bin/cyberlab" health || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" health || exit 1
 
     echo ""
     echo "============================================================"
     echo " 02/13 Validate All"
     echo "============================================================"
-    "$HOME/CyberLab/bin/cyberlab" validate-all || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" validate-all || exit 1
 
     echo ""
     echo "============================================================"
     echo " 03/13 Web Scan"
     echo "============================================================"
-    "$HOME/CyberLab/bin/cyberlab" web "$TARGET" || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" web "$TARGET" || exit 1
 
     echo ""
     echo "============================================================"
     echo " 04/13 Active Mode"
     echo "============================================================"
-    "$HOME/CyberLab/bin/cyberlab" active "$TARGET" || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" active run "LabInterno" "$TARGET" active || exit 1
 
     echo ""
     echo "============================================================"
     echo " 04B/13 Sincronizando evidências do Active"
     echo "============================================================"
 
-    LATEST_SCAN_ACTIVE="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+    LATEST_SCAN_ACTIVE="$(ls -td "$CYBERLAB_HOME/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
     TARGET_SLUG="$(echo "$TARGET" | tr '.:' '--')"
-    LATEST_ACTIVE="$(ls -td "$HOME/CyberLab/results/active/$TARGET_SLUG"* 2>/dev/null | head -n 1)"
+    LATEST_ACTIVE="$(ls -td "$CYBERLAB_HOME/results/active/$TARGET_SLUG"* 2>/dev/null | head -n 1)"
 
     if [ -n "$LATEST_SCAN_ACTIVE" ] && [ -n "$LATEST_ACTIVE" ]; then
       mkdir -p "$LATEST_SCAN_ACTIVE/08-evidence/active"
@@ -299,53 +305,53 @@ PY2
     echo "============================================================"
     echo " 05/13 Detect"
     echo "============================================================"
-    "$HOME/CyberLab/bin/cyberlab" detect "$TARGET" || true
+    "$CYBERLAB_HOME/bin/cyberlab" detect "$TARGET" || true
 
     echo ""
     echo "============================================================"
     echo " 06/13 Threat"
     echo "============================================================"
-    "$HOME/CyberLab/bin/cyberlab" threat "$TARGET" || true
+    "$CYBERLAB_HOME/bin/cyberlab" threat "$TARGET" || true
 
     echo ""
     echo "============================================================"
     echo " 07/13 Correlate"
     echo "============================================================"
-    "$HOME/CyberLab/bin/cyberlab" correlate "$TARGET" || true
+    "$CYBERLAB_HOME/bin/cyberlab" correlate "$TARGET" || true
 
     echo ""
     echo "============================================================"
     echo " 08/13 Findings"
     echo "============================================================"
-    "$HOME/CyberLab/bin/cyberlab" findings "$TARGET" || true
+    "$CYBERLAB_HOME/bin/cyberlab" findings "$TARGET" || true
 
     echo ""
     echo "============================================================"
     echo " 09/13 Risk"
     echo "============================================================"
-    "$HOME/CyberLab/bin/cyberlab" risk "$TARGET" || true
+    "$CYBERLAB_HOME/bin/cyberlab" risk "$TARGET" || true
 
     echo ""
     echo "============================================================"
     echo " 10/13 Assets"
     echo "============================================================"
-    "$HOME/CyberLab/bin/cyberlab" assets "$TARGET" || true
+    "$CYBERLAB_HOME/bin/cyberlab" assets "$TARGET" || true
 
     echo ""
     echo "============================================================"
     echo " 11/13 Timeline / Analytics / Remediation"
     echo "============================================================"
-    "$HOME/CyberLab/bin/cyberlab" timeline "$TARGET" || true
-    "$HOME/CyberLab/bin/cyberlab" analytics "$TARGET" || true
-    "$HOME/CyberLab/bin/cyberlab" remediation "$TARGET" || true
+    "$CYBERLAB_HOME/bin/cyberlab" timeline "$TARGET" || true
+    "$CYBERLAB_HOME/bin/cyberlab" analytics "$TARGET" || true
+    "$CYBERLAB_HOME/bin/cyberlab" remediation "$TARGET" || true
 
     echo ""
     echo "============================================================"
     echo " 12/13 Bloco 12 + Bloco 13"
     echo "============================================================"
-    "$HOME/CyberLab/bin/cyberlab" final "$TARGET" || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" final "$TARGET" || exit 1
 
-    LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+    LATEST_SCAN="$(ls -td "$CYBERLAB_HOME/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
 
     if [ -z "$LATEST_SCAN" ]; then
       echo "[ERRO] Não foi possível localizar a última pasta de scan."
@@ -384,10 +390,10 @@ PY2
       exit 1
     fi
 
-    cd "$HOME/CyberLab" || exit 1
+    cd "$CYBERLAB_HOME" || exit 1
 
-    if [ -d "$HOME/CyberLab/.venv" ]; then
-      source "$HOME/CyberLab/.venv/bin/activate"
+    if [ -d "$CYBERLAB_HOME/.venv" ]; then
+      source "$CYBERLAB_HOME/.venv/bin/activate"
     fi
 
     echo ""
@@ -408,10 +414,10 @@ PY2
       exit 1
     fi
 
-    cd "$HOME/CyberLab" || exit 1
+    cd "$CYBERLAB_HOME" || exit 1
 
-    if [ -d "$HOME/CyberLab/.venv" ]; then
-      source "$HOME/CyberLab/.venv/bin/activate"
+    if [ -d "$CYBERLAB_HOME/.venv" ]; then
+      source "$CYBERLAB_HOME/.venv/bin/activate"
     fi
 
     echo ""
@@ -423,10 +429,10 @@ PY2
     echo "============================================================"
     echo ""
 
-    "$HOME/CyberLab/bin/cyberlab" final "$TARGET" || exit 1
-    "$HOME/CyberLab/bin/cyberlab" block14 "$TARGET" || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" final "$TARGET" || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" block14 "$TARGET" || exit 1
 
-    LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+    LATEST_SCAN="$(ls -td "$CYBERLAB_HOME/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
 
     echo ""
     echo "Relatórios finais:"
@@ -448,10 +454,10 @@ PY2
       exit 1
     fi
 
-    cd "$HOME/CyberLab" || exit 1
+    cd "$CYBERLAB_HOME" || exit 1
 
-    if [ -d "$HOME/CyberLab/.venv" ]; then
-      source "$HOME/CyberLab/.venv/bin/activate"
+    if [ -d "$CYBERLAB_HOME/.venv" ]; then
+      source "$CYBERLAB_HOME/.venv/bin/activate"
     fi
 
     echo ""
@@ -463,10 +469,10 @@ PY2
     echo "============================================================"
     echo ""
 
-    "$HOME/CyberLab/bin/cyberlab" full-active "$TARGET" || exit 1
-    "$HOME/CyberLab/bin/cyberlab" block14 "$TARGET" || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" full-active "$TARGET" || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" block14 "$TARGET" || exit 1
 
-    LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+    LATEST_SCAN="$(ls -td "$CYBERLAB_HOME/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
 
     echo ""
     echo "============================================================"
@@ -506,10 +512,10 @@ PY2
       exit 1
     fi
 
-    cd "$HOME/CyberLab" || exit 1
+    cd "$CYBERLAB_HOME" || exit 1
 
-    if [ -d "$HOME/CyberLab/.venv" ]; then
-      source "$HOME/CyberLab/.venv/bin/activate"
+    if [ -d "$CYBERLAB_HOME/.venv" ]; then
+      source "$CYBERLAB_HOME/.venv/bin/activate"
     fi
 
     echo ""
@@ -531,10 +537,10 @@ PY2
       exit 1
     fi
 
-    cd "$HOME/CyberLab" || exit 1
+    cd "$CYBERLAB_HOME" || exit 1
 
-    if [ -d "$HOME/CyberLab/.venv" ]; then
-      source "$HOME/CyberLab/.venv/bin/activate"
+    if [ -d "$CYBERLAB_HOME/.venv" ]; then
+      source "$CYBERLAB_HOME/.venv/bin/activate"
     fi
 
     echo ""
@@ -546,11 +552,11 @@ PY2
     echo "============================================================"
     echo ""
 
-    "$HOME/CyberLab/bin/cyberlab" full-active "$TARGET" || exit 1
-    "$HOME/CyberLab/bin/cyberlab" block14 "$TARGET" || exit 1
-    "$HOME/CyberLab/bin/cyberlab" block15 "$TARGET" active-plus || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" full-active "$TARGET" || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" block14 "$TARGET" || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" block15 "$TARGET" active-plus || exit 1
 
-    LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+    LATEST_SCAN="$(ls -td "$CYBERLAB_HOME/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
 
     echo ""
     echo "[OK] Active Plus finalizado."
@@ -566,10 +572,10 @@ PY2
       exit 1
     fi
 
-    cd "$HOME/CyberLab" || exit 1
+    cd "$CYBERLAB_HOME" || exit 1
 
-    if [ -d "$HOME/CyberLab/.venv" ]; then
-      source "$HOME/CyberLab/.venv/bin/activate"
+    if [ -d "$CYBERLAB_HOME/.venv" ]; then
+      source "$CYBERLAB_HOME/.venv/bin/activate"
     fi
 
     echo ""
@@ -596,11 +602,11 @@ PY2
     echo "[OK] Módulos validados"
     echo ""
 
-    "$HOME/CyberLab/bin/cyberlab" full-active "$TARGET" || exit 1
-    "$HOME/CyberLab/bin/cyberlab" block14 "$TARGET" || exit 1
-    "$HOME/CyberLab/bin/cyberlab" block15 "$TARGET" max-controlled || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" full-active "$TARGET" || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" block14 "$TARGET" || exit 1
+    "$CYBERLAB_HOME/bin/cyberlab" block15 "$TARGET" max-controlled || exit 1
 
-    LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+    LATEST_SCAN="$(ls -td "$CYBERLAB_HOME/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
 
     echo ""
     echo "============================================================"
@@ -634,11 +640,11 @@ PY2
 
   # === CYBERLAB_TOOLS_STACK_CASES ===
   tools-check|offensive-tools-check)
-    bash "$HOME/CyberLab/tools/offensive_tools_check.sh"
+    bash "$CYBERLAB_HOME/tools/offensive_tools_check.sh"
     ;;
 
   tools-install|install-offensive-tools)
-    bash "$HOME/CyberLab/tools/installers/install_offensive_stack.sh"
+    bash "$CYBERLAB_HOME/tools/installers/install_offensive_stack.sh"
     ;;
   # === END_CYBERLAB_TOOLS_STACK_CASES ===
 
@@ -655,10 +661,10 @@ PY2
       exit 1
     fi
 
-    cd "$HOME/CyberLab" || exit 1
-    source "$HOME/CyberLab/.venv/bin/activate" 2>/dev/null || true
+    cd "$CYBERLAB_HOME" || exit 1
+    source "$CYBERLAB_HOME/.venv/bin/activate" 2>/dev/null || true
 
-    python3 "$HOME/CyberLab/tools/orchestrator/tool_runner.py" \
+    python3 "$CYBERLAB_HOME/tools/orchestrator/tool_runner.py" \
       --target "$TARGET" \
       --profile "$PROFILE"
     ;;
@@ -673,10 +679,10 @@ PY2
       exit 1
     fi
 
-    cd "$HOME/CyberLab" || exit 1
-    source "$HOME/CyberLab/.venv/bin/activate" 2>/dev/null || true
+    cd "$CYBERLAB_HOME" || exit 1
+    source "$CYBERLAB_HOME/.venv/bin/activate" 2>/dev/null || true
 
-    python3 "$HOME/CyberLab/tools/orchestrator/tool_runner.py" \
+    python3 "$CYBERLAB_HOME/tools/orchestrator/tool_runner.py" \
       --target "$TARGET" \
       --profile "$PROFILE" \
       --approve
@@ -687,17 +693,17 @@ PY2
 
   # === CYBERLAB_CLEANUP_LAYER2_CASES ===
 cleanup-obsolete)
-    bash "$HOME/CyberLab/modules/core/cleanup-obsolete.sh" "${1:-dry-run}"
+    bash "$CYBERLAB_HOME/modules/core/cleanup-obsolete.sh" "${1:-dry-run}"
     ;;
 cleanup-status)
-    bash "$HOME/CyberLab/modules/core/cleanup-status.sh"
+    bash "$CYBERLAB_HOME/modules/core/cleanup-status.sh"
     ;;
 # === END_CYBERLAB_CLEANUP_LAYER2_CASES ===
 
 
     # === CYBERLAB_LAYER3_AUDIT_CONTEXT_CASE ===
     audit-context|context)
-        bash "$HOME/CyberLab/modules/core/audit-context.sh" "$@"
+        bash "$CYBERLAB_HOME/modules/core/audit-context.sh" "$@"
         exit $?
         ;;
     # === END_CYBERLAB_LAYER3_AUDIT_CONTEXT_CASE ===
@@ -705,13 +711,13 @@ cleanup-status)
     
 # === CYBERLAB_LAYER4C1_EDITORIAL_CASES ===
 client-final-polish|block17-4c1)
-    bash "$HOME/CyberLab/modules/client_final_delivery/block_17_4c1_editorial_polisher.sh" "${1:-}"
+    bash "$CYBERLAB_HOME/modules/client_final_delivery/block_17_4c1_editorial_polisher.sh" "${1:-}"
     ;;
 # === END_CYBERLAB_LAYER4C1_EDITORIAL_CASES ===
 
 # === CYBERLAB_BLOCK17_FINAL_DELIVERY_CASES ===
 client-final-delivery|block17-final|block17)
-    bash "$HOME/CyberLab/modules/client_final_delivery/block_17_final_client_delivery.sh" "${1:-}"
+    bash "$CYBERLAB_HOME/modules/client_final_delivery/block_17_final_client_delivery.sh" "${1:-}"
     exit $?
     ;;
 # === END_CYBERLAB_BLOCK17_FINAL_DELIVERY_CASES ===
@@ -729,13 +735,13 @@ client-final-delivery|block17-final|block17)
       exit 1
     fi
 
-    cd "$HOME/CyberLab" || exit 1
+    cd "$CYBERLAB_HOME" || exit 1
 
-    if [ -d "$HOME/CyberLab/.venv" ]; then
-      source "$HOME/CyberLab/.venv/bin/activate"
+    if [ -d "$CYBERLAB_HOME/.venv" ]; then
+      source "$CYBERLAB_HOME/.venv/bin/activate"
     fi
 
-    python3 "$HOME/CyberLab/modules/block_16_context_bridge.py" \
+    python3 "$CYBERLAB_HOME/modules/block_16_context_bridge.py" \
       "$CLIENT_NAME" \
       "$TARGET" \
       "$PROFILE"
@@ -747,7 +753,7 @@ client-final-delivery|block17-final|block17)
 
     echo ""
     echo "[B17] Encadeando entrega final ao cliente..."
-    bash "$HOME/CyberLab/modules/client_final_delivery/block_17_final_client_delivery.sh"
+    bash "$CYBERLAB_HOME/modules/client_final_delivery/block_17_final_client_delivery.sh"
     exit $?
     ;;
   # === END_CYBERLAB_BLOCK16_CASES ===
@@ -896,7 +902,7 @@ echo "Bloco 16 - Unified Client Audit Orchestrator:"
     command -v nmap curl jq python3 git dig whois tmux docker nuclei subfinder httpx katana naabu
     ;;
 
-  health)
+  doctor)
     bash "$CYBERLAB_MODULES/core/validate-all.sh"
     ;;
 
@@ -929,7 +935,7 @@ echo "Bloco 16 - Unified Client Audit Orchestrator:"
     ;;
 
   correlate)
-    bash "$HOME/CyberLab/modules/correlation/correlation.sh"
+    bash "$CYBERLAB_HOME/modules/correlation/correlation.sh"
     ;;
 
   redteam)
@@ -937,7 +943,7 @@ echo "Bloco 16 - Unified Client Audit Orchestrator:"
     ;;
 
   report)
-    bash "$HOME/CyberLab/modules/report/report-engine-enterprise.sh"
+    bash "$CYBERLAB_HOME/modules/report/report-engine-enterprise.sh"
     ;;
 
 
@@ -976,49 +982,49 @@ echo "Bloco 16 - Unified Client Audit Orchestrator:"
     ;;
 
   validate-json)
-    bash "$HOME/CyberLab/modules/ops/validate-json.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/ops/validate-json.sh" "$@"
     ;;
 op)
-    bash "$HOME/CyberLab/modules/operation/operation-v2.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/operation/operation-v2.sh" "$@"
     ;;
 
 db)
-    python3 "$HOME/CyberLab/modules/db/db-v2.py" "${1:-status}"
+    python3 "$CYBERLAB_HOME/modules/db/db-v2.py" "${1:-status}"
     ;;
 
 scan)
-    bash "$HOME/CyberLab/modules/scan/scan-engine.sh" "${1:-}" "${2:-safe}"
+    bash "$CYBERLAB_HOME/modules/scan/scan-engine.sh" "${1:-}" "${2:-safe}"
     ;;
 
 finding)
-    bash "$HOME/CyberLab/modules/finding/finding-engine.sh"
+    bash "$CYBERLAB_HOME/modules/finding/finding-engine.sh"
     ;;
 
 gov)
-    bash "$HOME/CyberLab/modules/governance/governance.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/governance/governance.sh" "$@"
     ;;
 
 
 scope)
-    bash "$HOME/CyberLab/modules/scope/scope.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/scope/scope.sh" "$@"
     ;;
 
 
 policy)
-    bash "$HOME/CyberLab/modules/policy/policy.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/policy/policy.sh" "$@"
     ;;
 
 
 guarded-run)
-    bash "$HOME/CyberLab/modules/policy/policy.sh" guarded-run "$@"
+    bash "$CYBERLAB_HOME/modules/policy/policy.sh" guarded-run "$@"
     ;;
 
 runtime)
-    bash "$HOME/CyberLab/modules/runtime/runtime.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/runtime/runtime.sh" "$@"
     ;;
 
 quality)
-    bash "$HOME/CyberLab/modules/quality/quality-gate.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/quality/quality-gate.sh" "$@"
     ;;
 
 
@@ -1039,57 +1045,57 @@ quality)
 
 
 rbac)
-    bash "$HOME/CyberLab/modules/rbac/rbac.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/rbac/rbac.sh" "$@"
     ;;
 
 evidence)
-    bash "$HOME/CyberLab/modules/evidence/evidence.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/evidence/evidence.sh" "$@"
     ;;
 
 approval)
-    bash "$HOME/CyberLab/modules/approval/approval.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/approval/approval.sh" "$@"
     ;;
 
 control)
-    bash "$HOME/CyberLab/modules/control/control.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/control/control.sh" "$@"
     ;;
 
 queue)
-    bash "$HOME/CyberLab/modules/queue/queue.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/queue/queue.sh" "$@"
     ;;
 
 
 active)
-    bash "$HOME/CyberLab/modules/active/active.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/active/active.sh" "$@"
     ;;
 
 worker)
-    bash "$HOME/CyberLab/modules/worker/worker.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/worker/worker.sh" "$@"
     ;;
 
 # === CYBERLAB_COMMAND_CENTER_CASES ===
 audit)
-    bash "$HOME/CyberLab/modules/core/command-center.sh" audit "$@"
+    bash "$CYBERLAB_HOME/modules/core/command-center.sh" audit "$@"
     exit $?
     ;;
 
 recon)
-    bash "$HOME/CyberLab/modules/core/command-center.sh" recon "$@"
+    bash "$CYBERLAB_HOME/modules/core/command-center.sh" recon "$@"
     exit $?
     ;;
 
 deliver)
-    bash "$HOME/CyberLab/modules/core/command-center.sh" deliver "$@"
+    bash "$CYBERLAB_HOME/modules/core/command-center.sh" deliver "$@"
     exit $?
     ;;
 
 maintain)
-    bash "$HOME/CyberLab/modules/core/command-center.sh" maintain "$@"
+    bash "$CYBERLAB_HOME/modules/core/command-center.sh" maintain "$@"
     exit $?
     ;;
 
 lab)
-    bash "$HOME/CyberLab/modules/core/command-center.sh" lab "$@"
+    bash "$CYBERLAB_HOME/modules/core/command-center.sh" lab "$@"
     exit $?
     ;;
 # === END_CYBERLAB_COMMAND_CENTER_CASES ===

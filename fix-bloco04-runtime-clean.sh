@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== FIX BLOCO 04 — RUNTIME CLEAN ===="
 
@@ -14,7 +14,7 @@ cat > "$BASE/modules/runtime/runtime.sh" <<'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 STATE="$BASE/modules/runtime/state"
 LOCKDIR="$STATE/locks"
 PIDDIR="$STATE/pids"
@@ -111,7 +111,7 @@ p = Path.home() / "CyberLab/bin/cyberlab"
 s = p.read_text()
 
 block = '''runtime)
-    bash "$HOME/CyberLab/modules/runtime/runtime.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/runtime/runtime.sh" "$@"
     ;;
 '''
 

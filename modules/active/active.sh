@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 OUTBASE="$BASE/results/active"
 WORDLIST="$BASE/data/wordlists/active-small.txt"
 

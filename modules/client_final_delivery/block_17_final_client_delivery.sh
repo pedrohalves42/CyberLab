@@ -1,10 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-source "$HOME/CyberLab/core/bootstrap.sh" 2>/dev/null || true
-source "$HOME/CyberLab/.venv/bin/activate" 2>/dev/null || true
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh" 2>/dev/null || true
+source "$CYBERLAB_HOME/.venv/bin/activate" 2>/dev/null || true
 
-CONTEXT="$HOME/CyberLab/state/audit/current_audit_context.json"
+CONTEXT="$CYBERLAB_HOME/state/audit/current_audit_context.json"
 
 if [ ! -f "$CONTEXT" ]; then
     echo "[ERRO] Contexto oficial não encontrado: $CONTEXT"
@@ -76,25 +76,25 @@ run_stage() {
 }
 
 run_stage "01" "block17_4a_findings_consolidator" \
-    bash "$HOME/CyberLab/modules/client_final_delivery/block_17_4a_findings_consolidator.sh"
+    bash "$CYBERLAB_HOME/modules/client_final_delivery/block_17_4a_findings_consolidator.sh"
 
 run_stage "02" "block17_4a1_client_calibration" \
-    bash "$HOME/CyberLab/modules/client_final_delivery/block_17_4a1_client_calibration.sh" "$SCAN_DIR"
+    bash "$CYBERLAB_HOME/modules/client_final_delivery/block_17_4a1_client_calibration.sh" "$SCAN_DIR"
 
 run_stage "03" "block17_4b_client_language_translator" \
-    bash "$HOME/CyberLab/modules/client_final_delivery/block_17_4b_client_language_translator.sh"
+    bash "$CYBERLAB_HOME/modules/client_final_delivery/block_17_4b_client_language_translator.sh"
 
 run_stage "04" "block17_4c_final_report_assembler" \
-    bash "$HOME/CyberLab/modules/client_final_delivery/block_17_4c_final_report_assembler.sh"
+    bash "$CYBERLAB_HOME/modules/client_final_delivery/block_17_4c_final_report_assembler.sh"
 
 run_stage "05" "block17_4c1_editorial_polisher" \
-    bash "$HOME/CyberLab/modules/client_final_delivery/block_17_4c1_editorial_polisher.sh" "$SCAN_DIR"
+    bash "$CYBERLAB_HOME/modules/client_final_delivery/block_17_4c1_editorial_polisher.sh" "$SCAN_DIR"
 
 run_stage "06" "block17_4c2_technical_severity_integrity_fix" \
-  bash "$HOME/CyberLab/modules/client_final_delivery/block_17_4c2_technical_severity_integrity_fix.sh" "$SCAN_DIR"
+  bash "$CYBERLAB_HOME/modules/client_final_delivery/block_17_4c2_technical_severity_integrity_fix.sh" "$SCAN_DIR"
 
 run_stage "07" "block17_4d_final_pdf_publisher" \
-    bash "$HOME/CyberLab/modules/client_final_delivery/block_17_4d_final_pdf_publisher.sh" "$SCAN_DIR"
+    bash "$CYBERLAB_HOME/modules/client_final_delivery/block_17_4d_final_pdf_publisher.sh" "$SCAN_DIR"
 
 python3 - "$SCAN_DIR" <<'PY'
 import json

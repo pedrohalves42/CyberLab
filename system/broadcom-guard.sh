@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 broadcom_detect() {
   lspci 2>/dev/null | grep -Ei 'Broadcom|BCM'

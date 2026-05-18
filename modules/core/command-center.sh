@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-CYBERLAB_HOME="$HOME/CyberLab"
+CYBERLAB_HOME="$CYBERLAB_HOME"
 CYBERLAB_BIN="$CYBERLAB_HOME/bin/cyberlab"
 
 run_cyberlab() {

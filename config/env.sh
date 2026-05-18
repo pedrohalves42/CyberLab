@@ -1,4 +1,4 @@
-export CYBERLAB_HOME="$HOME/CyberLab"
+export CYBERLAB_HOME="$CYBERLAB_HOME"
 export CYBERLAB_VERSION="1.0-unified-clean"
 
 export CYBERLAB_BIN="$CYBERLAB_HOME/bin"

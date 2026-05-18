@@ -2,7 +2,7 @@
 
 set -u
 
-CYBER="$HOME/CyberLab/bin/cyberlab"
+CYBER="$CYBERLAB_HOME/bin/cyberlab"
 
 if [ ! -f "$CYBER" ]; then
   echo "[ERRO] bin/cyberlab não encontrado"
@@ -14,7 +14,7 @@ cp "$CYBER" "$CYBER.bak.$(date +%s)"
 cat > "$CYBER" <<'EOS'
 #!/bin/bash
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 CMD="$1"
 shift || true
@@ -149,7 +149,7 @@ echo "[OK] Dispatcher central reconstruído"
 echo
 echo "Teste agora:"
 echo
-echo "source ~/CyberLab/core/bootstrap.sh"
+echo "source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh""
 echo "hash -r"
 echo "cyberlab help"
 echo "cyberlab sync-all"

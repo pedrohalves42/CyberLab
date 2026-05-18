@@ -1,5 +1,5 @@
 #!/bin/bash
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 CLIENT="$1"
 [ -z "$CLIENT" ] && echo "Uso: validate-delivery Cliente" && exit 1

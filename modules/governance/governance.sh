@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 OPS="$BASE/operations"
 CURRENT="$BASE/state/current-operation.txt"
 

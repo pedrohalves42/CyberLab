@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 # === CYBERLAB_VALIDATE_MODE_FALLBACK ===
 # Fallback seguro para ambientes onde validate_mode não foi carregado pelo bootstrap.

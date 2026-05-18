@@ -1,5 +1,5 @@
 #!/bin/bash
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 echo "==== CYBERLAB CLEANUP ===="
 find "$CYBERLAB_HOME" -name "*.tmp" -delete 2>/dev/null || true

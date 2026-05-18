@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 SCAN_DIR="${1:-}"
 
@@ -12,7 +12,7 @@ echo "=============================================================="
 echo ""
 
 if [ -n "$SCAN_DIR" ]; then
-    python3 "$HOME/CyberLab/core/client_final_delivery/editorial_polisher.py" "$SCAN_DIR"
+    python3 "$CYBERLAB_HOME/core/client_final_delivery/editorial_polisher.py" "$SCAN_DIR"
 else
-    python3 "$HOME/CyberLab/core/client_final_delivery/editorial_polisher.py"
+    python3 "$CYBERLAB_HOME/core/client_final_delivery/editorial_polisher.py"
 fi

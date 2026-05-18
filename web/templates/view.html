@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Resultado do Scan</h2>
+
+<div class="grid">
+  <div class="card"><strong>{{ summary.get("client", "Cliente") }}</strong><span>Cliente</span></div>
+  <div class="card"><strong>{{ summary.get("target", "-") }}</strong><span>Alvo</span></div>
+  <div class="card"><strong>{{ risk.get("score", 0) }}</strong><span>Score</span></div>
+  <div class="card danger"><strong>{{ risk.get("level", "BAIXO") }}</strong><span>Nível</span></div>
+</div>
+
+<div class="actions">
+  <a href="/file?path={{ path }}&name=html" target="_blank">Abrir HTML</a>
+  <a href="/file?path={{ path }}&name=pdf" target="_blank">Abrir PDF</a>
+  <a href="/file?path={{ path }}&name=executive" target="_blank">Executivo</a>
+  <a href="/file?path={{ path }}&name=technical" target="_blank">Técnico</a>
+  <a href="/file?path={{ path }}&name=matrix" target="_blank">Matriz</a>
+</div>
+
+<h3>Análise de Risco</h3>
+<pre>{{ analysis }}</pre>
+
+<h3>Matriz Técnica</h3>
+<pre>{{ matrix }}</pre>
+{% endblock %}

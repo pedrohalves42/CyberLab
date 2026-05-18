@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB OPERAÇÃO BÁSICA CLEAN ===="
 

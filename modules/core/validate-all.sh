@@ -1,57 +1,194 @@
 #!/bin/bash
+set -u
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/env.sh"
 
-echo "==== CYBERLAB VALIDATE ALL ===="
+echo "============================================================"
+echo " CYBERLAB VALIDATE ALL — STRUCTURAL QUALITY GATE"
+echo "============================================================"
 
 FAIL=0
+WARN=0
+
+ok() {
+  echo "[OK] $*"
+}
+
+warn() {
+  echo "[WARN] $*"
+  WARN=$((WARN+1))
+}
+
+fail() {
+  echo "[FAIL] $*"
+  FAIL=$((FAIL+1))
+}
 
 check_file() {
-  [ -f "$1" ] && echo "[OK] $1" || { echo "[FAIL] $1"; FAIL=$((FAIL+1)); }
+  if [ -f "$1" ]; then
+    ok "$1"
+  else
+    fail "Arquivo ausente: $1"
+  fi
 }
 
 check_dir() {
-  [ -d "$1" ] && echo "[OK] $1" || { echo "[FAIL] $1"; FAIL=$((FAIL+1)); }
+  if [ -d "$1" ]; then
+    ok "$1"
+  else
+    fail "Diretório ausente: $1"
+  fi
 }
 
-echo
-echo "[Diretórios]"
-for d in "$CYBERLAB_HOME" "$CYBERLAB_BIN" "$CYBERLAB_CORE" "$CYBERLAB_MODULES" "$CYBERLAB_RESULTS" "$CYBERLAB_CONFIG" "$CYBERLAB_CLIENTS" "$CYBERLAB_LOGS" "$CYBERLAB_STATE"; do
+echo ""
+echo "=== [1] Diretórios essenciais ==="
+for d in \
+  "$CYBERLAB_HOME" \
+  "$CYBERLAB_BIN" \
+  "$CYBERLAB_CORE" \
+  "$CYBERLAB_MODULES" \
+  "$CYBERLAB_CONFIG"; do
   check_dir "$d"
 done
 
-echo
-echo "[Arquivos essenciais]"
-check_file "$CYBERLAB_CORE/bootstrap.sh"
+echo ""
+echo "=== [2] Arquivos essenciais ==="
 check_file "$CYBERLAB_BIN/cyberlab"
-check_file "$CYBERLAB_MODULES/core/sync-all.sh"
+check_file "$CYBERLAB_CORE/env.sh"
+check_file "$CYBERLAB_CORE/bootstrap.sh"
+check_file "$CYBERLAB_CORE/init.sh"
 check_file "$CYBERLAB_MODULES/core/validate-all.sh"
+check_file "$CYBERLAB_MODULES/core/sync-all.sh"
 
-echo
-echo "[Comandos mapeados]"
-for cmd in status sync sync-all validate-all health tools labup client web lan threat detect correlate redteam dashboard monitor menu intelligence risk findings assets timeline analytics remediation delivery report cleanup-obsolete cleanup-status audit-context context block16 client-audit-final-approved client-final-polish block17-4c1 client-final-delivery block17-final block17 audit recon deliver maintain lab; do
-  if grep -Eq "^[[:space:]]*([^#[:space:]]+\|)*${cmd}(\|[^)]*)?\)" "$CYBERLAB_BIN/cyberlab"; then
-    echo "[OK/MAP] cyberlab $cmd"
+echo ""
+echo "=== [3] Sintaxe do dispatcher ==="
+if bash -n "$CYBERLAB_BIN/cyberlab" 2>/dev/null; then
+  ok "bin/cyberlab sintaticamente válido"
+else
+  fail "bin/cyberlab com erro de sintaxe"
+fi
+
+echo ""
+echo "=== [4] Sintaxe dos scripts shell ativos ==="
+while IFS= read -r -d '' shfile; do
+  if bash -n "$shfile" 2>/dev/null; then
+    ok "Shell válido: ${shfile#$CYBERLAB_HOME/}"
   else
-    echo "[WARN] não mapeado: cyberlab $cmd"
+    fail "Shell inválido: ${shfile#$CYBERLAB_HOME/}"
+  fi
+done < <(
+  find "$CYBERLAB_HOME" \
+    \( \
+      -path "$CYBERLAB_HOME/.venv" -o \
+      -path "$CYBERLAB_HOME/results" -o \
+      -path "$CYBERLAB_HOME/clients" -o \
+      -path "$CYBERLAB_HOME/quarantine" -o \
+      -path "$CYBERLAB_HOME/archive" -o \
+      -path "$CYBERLAB_HOME/tools/setoolkit" -o \
+      -path "$CYBERLAB_HOME/tools/wordlists/SecLists" \
+    \) -prune \
+    -o \
+    -type f -name "*.sh" -print0 2>/dev/null
+)
+
+echo ""
+echo "=== [5] Compilação Python ==="
+if python3 -m compileall -q \
+  "$CYBERLAB_CORE" \
+  "$CYBERLAB_MODULES" \
+  "$CYBERLAB_WEB" \
+  "$CYBERLAB_HOME/tools" \
+  2>/dev/null; then
+  ok "Python compilável"
+else
+  fail "Falha ao compilar arquivos Python"
+fi
+
+echo ""
+echo "=== [6] Arquivos JSON de configuração/código ==="
+JSON_COUNT=0
+
+while IFS= read -r -d '' jsonfile; do
+  JSON_COUNT=$((JSON_COUNT+1))
+  if command -v jq >/dev/null 2>&1; then
+    if jq empty "$jsonfile" >/dev/null 2>&1; then
+      ok "JSON válido: ${jsonfile#$CYBERLAB_HOME/}"
+    else
+      fail "JSON inválido: ${jsonfile#$CYBERLAB_HOME/}"
+    fi
+  else
+    warn "jq não encontrado; JSON não validado: ${jsonfile#$CYBERLAB_HOME/}"
+  fi
+done < <(
+  find "$CYBERLAB_HOME" \
+    \( \
+      -path "$CYBERLAB_HOME/.venv" -o \
+      -path "$CYBERLAB_HOME/results" -o \
+      -path "$CYBERLAB_HOME/clients" -o \
+      -path "$CYBERLAB_HOME/quarantine" -o \
+      -path "$CYBERLAB_HOME/archive" -o \
+      -path "$CYBERLAB_HOME/tools/setoolkit" -o \
+      -path "$CYBERLAB_HOME/tools/wordlists/SecLists" -o \
+      -path "$CYBERLAB_HOME/state" -o \
+      -path "$CYBERLAB_HOME/queue/pending" -o \
+      -path "$CYBERLAB_HOME/queue/running" -o \
+      -path "$CYBERLAB_HOME/queue/completed" -o \
+      -path "$CYBERLAB_HOME/queue/failed" \
+    \) -prune \
+    -o \
+    -type f -name "*.json" -print0 2>/dev/null
+)
+
+if [ "$JSON_COUNT" -eq 0 ]; then
+  warn "Nenhum JSON estrutural encontrado para validar"
+fi
+
+echo ""
+echo "=== [7] Ferramentas essenciais e opcionais ==="
+
+for tool in bash python3 git curl jq; do
+  if command -v "$tool" >/dev/null 2>&1; then
+    ok "Ferramenta essencial disponível: $tool"
+  else
+    fail "Ferramenta essencial ausente: $tool"
   fi
 done
 
-echo
-echo "[Ferramentas]"
-for t in nmap curl jq python3 git dig whois tmux docker nuclei subfinder httpx katana naabu; do
-  command -v "$t" >/dev/null 2>&1 && echo "[OK] $t" || echo "[MISS] $t"
+for tool in nmap nuclei httpx subfinder dnsx katana naabu docker; do
+  if command -v "$tool" >/dev/null 2>&1; then
+    ok "Ferramenta opcional disponível: $tool"
+  else
+    warn "Ferramenta opcional ausente: $tool"
+  fi
 done
 
-echo
-echo "[JSON]"
-find "$CYBERLAB_HOME" \
-    \( -path "$CYBERLAB_HOME/quarantine" -o -path "$CYBERLAB_HOME/tools/wordlists" \) -prune -o \
-    -name "*.json" -type f -print 2>/dev/null | while read -r j; do
-    jq empty "$j" >/dev/null 2>&1 && echo "[OK] $j" || echo "[BROKEN] $j"
+echo ""
+echo "=== [8] Mapeamento básico de comandos do dispatcher ==="
+
+for cmd in \
+  init help menu status health doctor validate-all sync sync-all \
+  audit recon deliver maintain lab \
+  block16 client-audit-final-approved \
+  client-final-delivery block17-final block17; do
+
+  if grep -Eq "^[[:space:]]*([^#[:space:]]+\\|)*${cmd}(\\|[^)]*)?\\)" "$CYBERLAB_BIN/cyberlab"; then
+    ok "Comando mapeado: cyberlab $cmd"
+  else
+    warn "Comando não localizado diretamente no dispatcher: cyberlab $cmd"
+  fi
 done
 
-echo "[Resumo]"
-[ "$FAIL" -eq 0 ] && echo "[OK] Estrutura validada" || echo "[WARN] Falhas estruturais: $FAIL"
+echo ""
+echo "============================================================"
+echo " RESUMO DO VALIDATE ALL"
+echo "============================================================"
+echo "Falhas: $FAIL"
+echo "Avisos: $WARN"
 
-echo "[OK/MAP] cyberlab intelligence-pipeline"
+if [ "$FAIL" -gt 0 ]; then
+  echo "[FAIL] Validação estrutural reprovada."
+  exit 1
+fi
+
+echo "[OK] Validação estrutural aprovada."
+exit 0

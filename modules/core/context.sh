@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 
-export CYBERLAB_BASE="$HOME/CyberLab"
+export CYBERLAB_BASE="$CYBERLAB_HOME"
 export CYBERLAB_STATE="$CYBERLAB_BASE/state"
 export CYBERLAB_INTEL="$CYBERLAB_STATE/intelligence"
 export CYBERLAB_LOGS="$CYBERLAB_BASE/logs"

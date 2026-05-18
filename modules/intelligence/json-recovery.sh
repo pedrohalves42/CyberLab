@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TARGET="${1:-$HOME/CyberLab/results}"
+TARGET="${1:-$CYBERLAB_HOME/results}"
 
 echo "==== CYBERLAB JSON RECOVERY ===="
 

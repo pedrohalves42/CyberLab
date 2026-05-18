@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB BLOCO 17 INTELLIGENCE CLEAN ===="
 
@@ -11,7 +11,7 @@ cat > "$BASE/modules/intelligence/repair-final-json.sh" <<'SCRIPT'
 #!/bin/bash
 set -u
 
-STATE="$HOME/CyberLab/state/intelligence"
+STATE="$CYBERLAB_HOME/state/intelligence"
 mkdir -p "$STATE"
 
 F="$STATE/findings-scored.json"

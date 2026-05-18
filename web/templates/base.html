@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>CyberLab Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <aside>
+    <h1>CyberLab</h1>
+    <p>Unified Clean</p>
+
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/scan">Novo Scan</a>
+      <a href="/latest">Último Resultado</a>
+      <a href="/clients">Clientes</a>
+    </nav>
+  </aside>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

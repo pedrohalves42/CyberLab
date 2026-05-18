@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB REPORT + DELIVERY ENTERPRISE ===="
 
@@ -11,7 +11,7 @@ cat > "$BASE/modules/report/report-engine-enterprise.sh" <<'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 STATE="$BASE/state/intelligence"
 REPORTS="$BASE/state/reports"
 
@@ -160,7 +160,7 @@ p = Path.home() / "CyberLab/bin/cyberlab"
 s = p.read_text()
 
 report_block = '''report)
-    bash "$HOME/CyberLab/modules/report/report-engine-enterprise.sh"
+    bash "$CYBERLAB_HOME/modules/report/report-engine-enterprise.sh"
     ;;
 '''
 

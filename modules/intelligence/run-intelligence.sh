@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 STATE="$BASE/state/intelligence"
 mkdir -p "$STATE"
 

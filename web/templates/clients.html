@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Clientes</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Cliente</th>
+      <th>Domínio principal</th>
+      <th>Criado em</th>
+      <th>Último relatório</th>
+      <th>Entrega PRO</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in clients %}
+    <tr>
+      <td>{{ c.name }}</td>
+      <td>{{ c.domain }}</td>
+      <td>{{ c.created }}</td>
+      <td>
+        {% if c.latest %}
+          <a href="/view?path={{ c.latest }}">Abrir</a>
+          <a href="/file?path={{ c.latest }}&name=pdf" target="_blank">PDF</a>
+        {% else %}
+          Sem relatório
+        {% endif %}
+      </td>
+      <td>
+        <a href="/delivery?client={{ c.name }}">Gerar ZIP</a>
+        <a href="/delivery/download?client={{ c.name }}">Baixar ZIP</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

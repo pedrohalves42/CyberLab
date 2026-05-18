@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB THREAT ENGINE V2 FINAL ===="
 
@@ -11,7 +11,7 @@ cat > "$BASE/modules/threat/threat-engine-v2.sh" <<'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 TARGET="${1:-}"
 
 [ -z "$TARGET" ] && {
@@ -181,7 +181,7 @@ p = Path.home() / "CyberLab/bin/cyberlab"
 s = p.read_text()
 
 block = '''threat)
-    bash "$HOME/CyberLab/modules/threat/threat-engine-v2.sh" "${1:-}"
+    bash "$CYBERLAB_HOME/modules/threat/threat-engine-v2.sh" "${1:-}"
     ;;
 '''
 

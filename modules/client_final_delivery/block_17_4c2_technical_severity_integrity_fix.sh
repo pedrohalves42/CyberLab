@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 PY="$BASE/core/client_final_delivery/technical_severity_integrity_fix.py"
 CTX="$BASE/state/audit/current_audit_context.json"
 

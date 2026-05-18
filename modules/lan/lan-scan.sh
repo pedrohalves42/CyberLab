@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 OUT="$CYBERLAB_RESULTS/lan/lan-$(timestamp)"
 mkdir -p "$OUT"/{discovery,ports,evidence,report}

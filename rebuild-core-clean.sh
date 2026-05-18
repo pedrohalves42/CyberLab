@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== REBUILD CYBERLAB CORE CLEAN ===="
 
@@ -47,7 +47,7 @@ cat > "$BASE/core/delivery.sh" <<'EOS'
 #!/bin/bash
 set -u
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 CMD="${1:-generate}"
 CLIENT="${2:-}"
@@ -62,7 +62,7 @@ slugify() {
 latest_delivery() {
   CLIENT="$1"
   SLUG="$(slugify "$CLIENT")"
-  DIR="$HOME/CyberLab/clients/$SLUG/reports/delivery"
+  DIR="$CYBERLAB_HOME/clients/$SLUG/reports/delivery"
   find "$DIR" -maxdepth 1 -type d 2>/dev/null | sort | tail -n 1
 }
 
@@ -75,7 +75,7 @@ generate_delivery() {
 
   CLIENT_SLUG="$(slugify "$CLIENT")"
   DATE_ID="$(date +%Y-%m-%d_%H-%M-%S)"
-  CLIENT_DIR="$HOME/CyberLab/clients/$CLIENT_SLUG"
+  CLIENT_DIR="$CYBERLAB_HOME/clients/$CLIENT_SLUG"
   OUT="$CLIENT_DIR/reports/delivery/$DATE_ID"
   ZIP="$CLIENT_DIR/reports/cyberlab_${CLIENT_SLUG}_${DATE_ID}.zip"
   VALIDATION="$OUT/validation.txt"
@@ -90,12 +90,12 @@ generate_delivery() {
 
   # JSON oficiais únicos
   for f in findings-scored risk-summary analytics remediation-plan timeline assets; do
-    SRC="$HOME/CyberLab/state/intelligence/$f.json"
+    SRC="$CYBERLAB_HOME/state/intelligence/$f.json"
     [ -f "$SRC" ] && cp "$SRC" "$OUT/json/$f.json"
   done
 
   # Evidências do último web scan
-  LATEST_WEB="$(cat "$HOME/CyberLab/results/web/latest.txt" 2>/dev/null || true)"
+  LATEST_WEB="$(cat "$CYBERLAB_HOME/results/web/latest.txt" 2>/dev/null || true)"
   if [ -n "$LATEST_WEB" ] && [ -d "$LATEST_WEB" ]; then
     cp -r "$LATEST_WEB" "$OUT/evidence/web" 2>/dev/null || true
     cp "$LATEST_WEB/report/report.pdf" "$OUT/reports/report.pdf" 2>/dev/null || true
@@ -165,7 +165,7 @@ cat > "$BASE/install-operacao-basica.sh" <<'EOS'
 #!/bin/bash
 set -e
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB OPERAÇÃO BÁSICA CLEAN ===="
 
@@ -185,7 +185,7 @@ cat > "$BASE/install-bloco17-intelligence.sh" <<'EOS'
 #!/bin/bash
 set -e
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB BLOCO 17 INTELLIGENCE CLEAN ===="
 
@@ -195,7 +195,7 @@ cat > "$BASE/modules/intelligence/repair-final-json.sh" <<'SCRIPT'
 #!/bin/bash
 set -u
 
-STATE="$HOME/CyberLab/state/intelligence"
+STATE="$CYBERLAB_HOME/state/intelligence"
 mkdir -p "$STATE"
 
 F="$STATE/findings-scored.json"
@@ -263,7 +263,7 @@ cat > "$BASE/install-bloco18-finalize.sh" <<'EOS'
 #!/bin/bash
 set -e
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB BLOCO 18 FINALIZE CLEAN ===="
 
@@ -273,7 +273,7 @@ cat > "$BASE/modules/intelligence/run-intelligence.sh" <<'SCRIPT'
 #!/bin/bash
 set -u
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 STATE="$BASE/state/intelligence"
 mkdir -p "$STATE"
 
@@ -359,7 +359,7 @@ chmod +x "$BASE/modules/intelligence/run-intelligence.sh"
 
 cat > "$BASE/modules/intelligence/intelligence-pipeline.sh" <<'SCRIPT'
 #!/bin/bash
-bash "$HOME/CyberLab/modules/intelligence/run-intelligence.sh"
+bash "$CYBERLAB_HOME/modules/intelligence/run-intelligence.sh"
 SCRIPT
 
 chmod +x "$BASE/modules/intelligence/intelligence-pipeline.sh"
@@ -384,7 +384,7 @@ echo "Agora rode:"
 echo "bash ~/CyberLab/install-operacao-basica.sh"
 echo "bash ~/CyberLab/install-bloco17-intelligence.sh"
 echo "bash ~/CyberLab/install-bloco18-finalize.sh"
-echo "source ~/CyberLab/core/bootstrap.sh"
+echo "source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh""
 echo "hash -r"
 echo "cyberlab intelligence"
 echo "cyberlab delivery generate \"Loja Maromba\""

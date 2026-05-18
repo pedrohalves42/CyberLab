@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB SCAN ENGINE FINAL ===="
 
@@ -11,7 +11,7 @@ cat > "$BASE/modules/scan/scan-engine.sh" <<'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 TARGET="${1:-}"
 MODE="${2:-safe}"
 
@@ -160,7 +160,7 @@ p = Path.home() / "CyberLab/bin/cyberlab"
 s = p.read_text()
 
 block = '''scan)
-    bash "$HOME/CyberLab/modules/scan/scan-engine.sh" "${1:-}" "${2:-safe}"
+    bash "$CYBERLAB_HOME/modules/scan/scan-engine.sh" "${1:-}" "${2:-safe}"
     ;;
 '''
 

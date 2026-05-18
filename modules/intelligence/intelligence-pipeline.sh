@@ -1,2 +1,2 @@
 #!/bin/bash
-bash "$HOME/CyberLab/modules/intelligence/run-intelligence.sh"
+bash "$CYBERLAB_HOME/modules/intelligence/run-intelligence.sh"

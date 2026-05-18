@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB CORE FINAL UNIFICADO ===="
 
@@ -41,7 +41,7 @@ cat > "$BASE/modules/core/context.sh" <<'SCRIPT'
 #!/bin/bash
 set -u
 
-export CYBERLAB_BASE="$HOME/CyberLab"
+export CYBERLAB_BASE="$CYBERLAB_HOME"
 export CYBERLAB_STATE="$CYBERLAB_BASE/state"
 export CYBERLAB_INTEL="$CYBERLAB_STATE/intelligence"
 export CYBERLAB_LOGS="$CYBERLAB_BASE/logs"
@@ -80,7 +80,7 @@ cat > "$BASE/modules/core/logger.sh" <<'SCRIPT'
 #!/bin/bash
 set -u
 
-LOG_DIR="$HOME/CyberLab/logs"
+LOG_DIR="$CYBERLAB_HOME/logs"
 mkdir -p "$LOG_DIR"
 
 log_event() {
@@ -104,7 +104,7 @@ cat > "$BASE/modules/ops/validate-json.sh" <<'SCRIPT'
 #!/bin/bash
 set -u
 
-TARGET="${1:-$HOME/CyberLab/state/intelligence}"
+TARGET="${1:-$CYBERLAB_HOME/state/intelligence}"
 
 BROKEN=0
 
@@ -378,13 +378,13 @@ s = p.read_text()
 
 replacements = {
 'intelligence)': '''intelligence)
-    bash "$HOME/CyberLab/modules/intelligence/unified-intelligence.sh"
+    bash "$CYBERLAB_HOME/modules/intelligence/unified-intelligence.sh"
     ;;''',
 'correlate)': '''correlate)
-    bash "$HOME/CyberLab/modules/correlation/correlation.sh"
+    bash "$CYBERLAB_HOME/modules/correlation/correlation.sh"
     ;;''',
 'validate-json)': '''validate-json)
-    bash "$HOME/CyberLab/modules/ops/validate-json.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/ops/validate-json.sh" "$@"
     ;;'''
 }
 

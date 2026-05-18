@@ -1,0 +1,23 @@
+# ============================================================
+# CyberLab — Scope Example
+# ============================================================
+# Use apenas alvos próprios ou com autorização explícita.
+#
+# Formatos aceitos:
+#   - domínio:
+#       example.com
+#   - IP:
+#       127.0.0.1
+#   - rede CIDR:
+#       192.168.1.0/24
+#
+# Não use:
+#   - barra final em domínio
+#   - URL com http:// ou https://
+#   - wildcard como 192.168.*.*/24
+# ============================================================
+
+localhost
+127.0.0.1
+192.168.1.0/24
+example.com

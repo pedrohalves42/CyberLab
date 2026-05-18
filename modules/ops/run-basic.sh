@@ -1,6 +1,6 @@
 #!/bin/bash
 set -u
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 CLIENT="$1"
 TARGET="$2"

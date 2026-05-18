@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB BLOCO 18 FINALIZE CLEAN ===="
 
@@ -11,7 +11,7 @@ cat > "$BASE/modules/intelligence/run-intelligence.sh" <<'SCRIPT'
 #!/bin/bash
 set -u
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 STATE="$BASE/state/intelligence"
 mkdir -p "$STATE"
 
@@ -97,7 +97,7 @@ chmod +x "$BASE/modules/intelligence/run-intelligence.sh"
 
 cat > "$BASE/modules/intelligence/intelligence-pipeline.sh" <<'SCRIPT'
 #!/bin/bash
-bash "$HOME/CyberLab/modules/intelligence/run-intelligence.sh"
+bash "$CYBERLAB_HOME/modules/intelligence/run-intelligence.sh"
 SCRIPT
 
 chmod +x "$BASE/modules/intelligence/intelligence-pipeline.sh"

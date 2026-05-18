@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB BLOCO 01 — GOVERNANCE LAYER ===="
 
@@ -21,7 +21,7 @@ cat > "$BASE/modules/governance/governance.sh" <<'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 OPS="$BASE/operations"
 CURRENT="$BASE/state/current-operation.txt"
 
@@ -350,7 +350,7 @@ esac
 s = p.read_text()
 
 block = '''gov)
-    bash "$HOME/CyberLab/modules/governance/governance.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/governance/governance.sh" "$@"
     ;;
 '''
 
@@ -370,7 +370,7 @@ echo
 echo "[OK] BLOCO 01 Governance Layer instalado"
 echo
 echo "Teste:"
-echo "source ~/CyberLab/core/bootstrap.sh"
+echo "source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh""
 echo "hash -r"
 echo "cyberlab gov create \"Loja Maromba\" lojamaromba.com"
 echo "cyberlab gov status"

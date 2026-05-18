@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 REPORT="$CYBERLAB_HOME/state/cleanup/latest_cleanup_report.md"
 MANIFEST="$CYBERLAB_HOME/state/cleanup/latest_cleanup_manifest.json"

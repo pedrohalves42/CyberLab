@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB BLOCO REPORT FINAL ===="
 
@@ -18,7 +18,7 @@ cat > "$BASE/modules/report/report-engine.sh" <<'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 STATE="$BASE/state/intelligence"
 OUT="$BASE/state/reports"
 
@@ -267,7 +267,7 @@ s = p.read_text()
 if "report)" not in s:
     marker = "*)"
     block = '''report)
-    bash "$HOME/CyberLab/modules/report/report-engine.sh"
+    bash "$CYBERLAB_HOME/modules/report/report-engine.sh"
     ;;
 '''
     idx = s.rfind(marker)
@@ -284,7 +284,7 @@ chmod +x "$BASE/bin/cyberlab"
 echo "[OK] Bloco Report Final instalado"
 echo
 echo "Agora rode:"
-echo "source ~/CyberLab/core/bootstrap.sh"
+echo "source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh""
 echo "hash -r"
 echo "cyberlab intelligence"
 echo "cyberlab correlate"

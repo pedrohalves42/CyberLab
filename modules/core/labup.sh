@@ -2,12 +2,12 @@
 
 set -u
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
-LOG="$HOME/CyberLab/logs/labup.log"
-STATE="$HOME/CyberLab/state/lab.state"
+LOG="$CYBERLAB_HOME/logs/labup.log"
+STATE="$CYBERLAB_HOME/state/lab.state"
 
-mkdir -p "$HOME/CyberLab/logs" "$HOME/CyberLab/state"
+mkdir -p "$CYBERLAB_HOME/logs" "$CYBERLAB_HOME/state"
 
 exec > >(tee -a "$LOG") 2>&1
 
@@ -34,12 +34,12 @@ mkdir -p \
   "$CYBERLAB_LOGS" \
   "$CYBERLAB_WEB" \
   "$CYBERLAB_UI" \
-  "$HOME/CyberLab/results/web" \
-  "$HOME/CyberLab/results/lan" \
-  "$HOME/CyberLab/results/threat" \
-  "$HOME/CyberLab/results/detection" \
-  "$HOME/CyberLab/results/correlation" \
-  "$HOME/CyberLab/results/redteam"
+  "$CYBERLAB_HOME/results/web" \
+  "$CYBERLAB_HOME/results/lan" \
+  "$CYBERLAB_HOME/results/threat" \
+  "$CYBERLAB_HOME/results/detection" \
+  "$CYBERLAB_HOME/results/correlation" \
+  "$CYBERLAB_HOME/results/redteam"
 
 touch "$CYBERLAB_CONFIG/scope.txt"
 touch "$CYBERLAB_LOGS/cyberlab.log"

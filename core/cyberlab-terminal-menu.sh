@@ -4,7 +4,7 @@
 # CyberLab Terminal Menu
 # ============================================================
 
-CYBERLAB_HOME="$HOME/CyberLab"
+CYBERLAB_HOME="$CYBERLAB_HOME"
 
 cyberlab_banner() {
   clear
@@ -147,7 +147,7 @@ cyberlab_latest() {
     return 1
   fi
 
-  LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+  LATEST_SCAN="$(ls -td "$CYBERLAB_HOME/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
 
   if [ -z "$LATEST_SCAN" ]; then
     echo "[ERRO] Nenhum scan encontrado para: $TARGET"
@@ -168,7 +168,7 @@ cyberlab_open_delivery() {
     return 1
   fi
 
-  LATEST_SCAN="$(ls -td "$HOME/CyberLab/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
+  LATEST_SCAN="$(ls -td "$CYBERLAB_HOME/results/web/$TARGET"/*/ 2>/dev/null | head -n 1 | sed 's:/*$::')"
 
   if [ -z "$LATEST_SCAN" ]; then
     echo "[ERRO] Nenhum scan encontrado para: $TARGET"
@@ -200,12 +200,12 @@ alias cyberlab-latest='cyberlab_latest'
 alias cyberlab-open-delivery='cyberlab_open_delivery'
 
 # Carrega ambiente do CyberLab se existir
-if [ -d "$HOME/CyberLab/.venv" ]; then
-  source "$HOME/CyberLab/.venv/bin/activate" 2>/dev/null || true
+if [ -d "$CYBERLAB_HOME/.venv" ]; then
+  source "$CYBERLAB_HOME/.venv/bin/activate" 2>/dev/null || true
 fi
 
 # Garante PATH do CyberLab
-export PATH="$PATH:$HOME/CyberLab/bin:$HOME/CyberLab/tools/bin:$HOME/go/bin:$HOME/.local/bin"
+export PATH="$PATH:$CYBERLAB_HOME/bin:$CYBERLAB_HOME/tools/bin:$HOME/go/bin:$HOME/.local/bin"
 
 # Mostrar menu automaticamente ao abrir terminal
 cyberlab_menu

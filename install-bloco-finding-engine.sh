@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 echo "==== CYBERLAB FINDING ENGINE ===="
 
@@ -40,7 +40,7 @@ cat > "$BASE/modules/finding/finding-engine.sh" <<'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 STATE="$BASE/state/intelligence"
 POLICY="$BASE/data/policies/finding-policy.json"
 
@@ -345,7 +345,7 @@ p = Path.home() / "CyberLab/bin/cyberlab"
 s = p.read_text()
 
 block = '''finding)
-    bash "$HOME/CyberLab/modules/finding/finding-engine.sh"
+    bash "$CYBERLAB_HOME/modules/finding/finding-engine.sh"
     ;;
 '''
 

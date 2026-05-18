@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 
-STATE="$HOME/CyberLab/state/intelligence"
+STATE="$CYBERLAB_HOME/state/intelligence"
 mkdir -p "$STATE"
 
 F="$STATE/findings-scored.json"

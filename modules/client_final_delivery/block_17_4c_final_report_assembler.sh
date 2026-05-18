@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-source "$HOME/CyberLab/core/bootstrap.sh"
+source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"
 
 echo "========================================================================"
 echo " CyberLab — Camada 4C"

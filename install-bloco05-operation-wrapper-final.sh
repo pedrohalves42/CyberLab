@@ -4,7 +4,7 @@ set -euo pipefail
 
 echo "==== CYBERLAB BLOCO 05 — OPERATION WRAPPER FINAL ===="
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 mkdir -p "$BASE/modules/op"
 mkdir -p "$BASE/modules/op/state"
@@ -18,7 +18,7 @@ cat > "$BASE/modules/op/op.sh" <<'OP'
 
 set -euo pipefail
 
-BASE="$HOME/CyberLab"
+BASE="$CYBERLAB_HOME"
 
 ###############################################################################
 # HELPERS
@@ -338,7 +338,7 @@ block = r'''
 
 op)
     shift
-    bash "$HOME/CyberLab/modules/op/op.sh" "$@"
+    bash "$CYBERLAB_HOME/modules/op/op.sh" "$@"
     ;;
 '''
 
@@ -364,7 +364,7 @@ echo
 
 echo "Fluxo oficial:"
 echo
-echo 'source ~/CyberLab/core/bootstrap.sh'
+echo 'source "${CYBERLAB_HOME:-$HOME/CyberLab}/core/bootstrap.sh"'
 echo 'hash -r'
 echo
 echo 'cyberlab op run "Loja Maromba" lojamaromba.com safe'
