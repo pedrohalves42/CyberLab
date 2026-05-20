@@ -22,6 +22,7 @@ mkdir -p \
   "$CYBERLAB_RESULTS/detection" \
   "$CYBERLAB_RESULTS/correlation" \
   "$CYBERLAB_RESULTS/redteam" \
+  "$CYBERLAB_RESULTS/surface" \
   "$CYBERLAB_STATE"
 
 echo "[1/9] Estrutura base OK"
@@ -35,6 +36,7 @@ MODULES=(
   "$CYBERLAB_CORE/client.sh"
   "$CYBERLAB_CORE/delivery.sh"
   "$CYBERLAB_MODULES/web/web-scan.sh"
+  "$CYBERLAB_MODULES/health/health.sh"
   "$CYBERLAB_MODULES/lan/lan-scan.sh"
   "$CYBERLAB_MODULES/threat/threat-engine.sh"
   "$CYBERLAB_MODULES/detection/detection-engine.sh"
@@ -43,6 +45,9 @@ MODULES=(
   "$CYBERLAB_UI/menu.sh"
   "$CYBERLAB_UI/monitor.sh"
   "$CYBERLAB_WEB/dashboard.py"
+
+  "$CYBERLAB_CORE/layer6/surface_expansion_engine.py"
+  "$CYBERLAB_MODULES/layer6/block_6a_surface_expansion.sh"
 
   "$CYBERLAB_MODULES/intelligence/intelligence.sh"
   "$CYBERLAB_MODULES/findings/findings-engine.py"
@@ -91,12 +96,29 @@ sync_latest() {
   fi
 }
 
+sync_latest_surface() {
+  base="$CYBERLAB_RESULTS/surface"
+  mkdir -p "$base"
+
+  latest="$(
+    find "$base"       -mindepth 2       -maxdepth 2       -type d       2>/dev/null       | sort       | tail -1
+  )"
+
+  if [ -n "$latest" ]; then
+    echo "$latest" > "$base/latest.txt"
+    echo "[OK] latest surface => $latest"
+  else
+    echo "[INFO] sem resultado para surface"
+  fi
+}
+
 sync_latest web
 sync_latest lan
 sync_latest threat
 sync_latest detection
 sync_latest correlation
 sync_latest redteam
+sync_latest_surface
 
 echo
 echo "[5/9] Criando estado central latest.json"
@@ -113,7 +135,8 @@ cat > "$CYBERLAB_STATE/latest.json" <<JSON
     "threat": "$(cat "$CYBERLAB_RESULTS/threat/latest.txt" 2>/dev/null)",
     "detection": "$(cat "$CYBERLAB_RESULTS/detection/latest.txt" 2>/dev/null)",
     "correlation": "$(cat "$CYBERLAB_RESULTS/correlation/latest.txt" 2>/dev/null)",
-    "redteam": "$(cat "$CYBERLAB_RESULTS/redteam/latest.txt" 2>/dev/null)"
+    "redteam": "$(cat "$CYBERLAB_RESULTS/redteam/latest.txt" 2>/dev/null)",
+    "surface": "$(cat "$CYBERLAB_RESULTS/surface/latest.txt" 2>/dev/null)"
   }
 }
 JSON
@@ -136,7 +159,7 @@ echo "[7/9] Verificando ferramentas principais"
 
 TOOLS=(
   bash zsh git curl wget jq python3 pip3 nmap whois dig tmux docker
-  arp-scan gobuster whatweb nikto wafw00f nuclei subfinder httpx katana naabu
+  arp-scan gobuster whatweb nikto wafw00f nuclei subfinder dnsx gau waybackurls httpx katana naabu
 )
 
 for t in "${TOOLS[@]}"; do

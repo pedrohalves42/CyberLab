@@ -59,6 +59,9 @@ check_file "$CYBERLAB_CORE/bootstrap.sh"
 check_file "$CYBERLAB_CORE/init.sh"
 check_file "$CYBERLAB_MODULES/core/validate-all.sh"
 check_file "$CYBERLAB_MODULES/core/sync-all.sh"
+check_file "$CYBERLAB_MODULES/health/health.sh"
+check_file "$CYBERLAB_CORE/layer6/surface_expansion_engine.py"
+check_file "$CYBERLAB_MODULES/layer6/block_6a_surface_expansion.sh"
 
 echo ""
 echo "=== [3] Sintaxe do dispatcher ==="
@@ -154,7 +157,7 @@ for tool in bash python3 git curl jq; do
   fi
 done
 
-for tool in nmap nuclei httpx subfinder dnsx katana naabu docker; do
+for tool in nmap nuclei httpx subfinder dnsx gau waybackurls katana naabu docker; do
   if command -v "$tool" >/dev/null 2>&1; then
     ok "Ferramenta opcional disponível: $tool"
   else
@@ -168,6 +171,7 @@ echo "=== [8] Mapeamento básico de comandos do dispatcher ==="
 for cmd in \
   init help menu status health doctor validate-all sync sync-all \
   audit recon deliver maintain lab \
+  surface block6a \
   block16 client-audit-final-approved \
   client-final-delivery block17-final block17; do
 

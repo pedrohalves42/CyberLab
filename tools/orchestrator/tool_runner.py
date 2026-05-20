@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, Any, List
 
 
-CYBERLAB_HOME = Path.home() / "CyberLab"
+CYBERLAB_HOME = Path(os.environ.get("CYBERLAB_HOME", str(Path.home() / "CyberLab"))).expanduser()
 REGISTRY_PATH = CYBERLAB_HOME / "tools/orchestrator/tool_registry.json"
 RESULTS_ROOT = CYBERLAB_HOME / "results/web"
 CLIENTS_ROOT = CYBERLAB_HOME / "clients"
@@ -85,7 +85,7 @@ def render_command(template: str, target: str, out: Path) -> str:
     return template.format(
         target=shlex.quote(target),
         out=shlex.quote(str(out)),
-        root=shlex.quote(str(Path.home() / "CyberLab")),
+        root=shlex.quote(str(CYBERLAB_HOME)),
     )
 
 
@@ -169,6 +169,64 @@ def run_tool(
             result["exit_code"] = proc.returncode
             result["status"] = "OK" if proc.returncode == 0 else "COMPLETED_WITH_ERRORS"
 
+            # Normalização do ZAP:
+            # o Quick Start pode gerar o HTML corretamente e ainda assim
+            # retornar código não-zero quando encerrado por timeout interno.
+            if tool_id == "zap_baseline":
+                zap_report = tool_out / "zap_baseline.html"
+                if zap_report.exists() and zap_report.stat().st_size > 0:
+                    if result["status"] != "OK":
+                        result["status"] = "OK_REPORT_GENERATED_WITH_TIMEOUT"
+                        result["notes"].append(
+                            "Relatório HTML do ZAP foi gerado; processo encerrou com código não-zero/timeout."
+                        )
+
+            # Normalização semântica de ferramentas cujo exit code
+            # pode representar um resultado válido, e não falha operacional.
+            if tool_id == "wpscan_passive":
+                wpscan_json = tool_out / "wpscan_passive.json"
+                if wpscan_json.exists():
+                    try:
+                        wpscan_data = json.loads(wpscan_json.read_text(encoding="utf-8"))
+                        scan_aborted = str(wpscan_data.get("scan_aborted", "")).strip()
+
+                        if "does not seem to be running WordPress" in scan_aborted:
+                            result["status"] = "OK_NOT_WORDPRESS"
+                            result["notes"].append(
+                                "WPScan executou corretamente e indicou que o alvo não aparenta usar WordPress."
+                            )
+                        elif scan_aborted:
+                            result["notes"].append(
+                                f"WPScan scan_aborted: {scan_aborted}"
+                            )
+                    except Exception as exc:
+                        result["notes"].append(
+                            f"Não foi possível interpretar o JSON do WPScan: {exc}"
+                        )
+
+            # Normalização semântica de ferramentas cujo exit code
+            # pode representar um resultado válido, e não falha operacional.
+            if tool_id == "wpscan_passive":
+                wpscan_json = tool_out / "wpscan_passive.json"
+                if wpscan_json.exists():
+                    try:
+                        wpscan_data = json.loads(wpscan_json.read_text(encoding="utf-8"))
+                        scan_aborted = str(wpscan_data.get("scan_aborted", "")).strip()
+
+                        if "does not seem to be running WordPress" in scan_aborted:
+                            result["status"] = "OK_NOT_WORDPRESS"
+                            result["notes"].append(
+                                "WPScan executou corretamente e indicou que o alvo não aparenta usar WordPress."
+                            )
+                        elif scan_aborted:
+                            result["notes"].append(
+                                f"WPScan scan_aborted: {scan_aborted}"
+                            )
+                    except Exception as exc:
+                        result["notes"].append(
+                            f"Não foi possível interpretar o JSON do WPScan: {exc}"
+                        )
+
         except subprocess.TimeoutExpired:
             result["status"] = "TIMEOUT"
             result["notes"].append(f"Timeout após {timeout}s.")
@@ -188,7 +246,7 @@ def write_summary(
     out_dir: Path,
     results: List[Dict[str, Any]],
 ) -> None:
-    ok = [r for r in results if r["status"] == "OK"]
+    ok = [r for r in results if str(r["status"]).startswith("OK")]
     skipped = [r for r in results if r["status"].startswith("SKIPPED")]
     errors = [r for r in results if r["status"] not in ("OK",) and not r["status"].startswith("SKIPPED")]
 

@@ -5,7 +5,8 @@
       "nmap_safe",
       "nikto_safe",
       "wapiti_light",
-      "zap_baseline"
+      "zap_baseline",
+      "gowitness_snapshot"
     ],
     "active": [
       "nmap_safe",
@@ -13,7 +14,9 @@
       "gobuster_controlled",
       "nikto_safe",
       "wapiti_light",
-      "zap_baseline"
+      "zap_baseline",
+      "gowitness_snapshot",
+      "wpscan_passive"
     ],
     "active-plus": [
       "nmap_safe",
@@ -22,7 +25,10 @@
       "nikto_safe",
       "wapiti_light",
       "zap_baseline",
-      "sqlmap_check"
+      "sqlmap_check",
+      "gowitness_snapshot",
+      "wpscan_passive",
+      "masscan_webports_controlled"
     ],
     "max-controlled": [
       "nmap_safe",
@@ -32,7 +38,10 @@
       "wapiti_light",
       "zap_baseline",
       "sqlmap_check",
-      "metasploit_check"
+      "metasploit_check",
+      "gowitness_snapshot",
+      "wpscan_passive",
+      "masscan_webports_controlled"
     ]
   },
   "tools": {
@@ -65,8 +74,8 @@
       "category": "web",
       "risk": "medium",
       "requires_approval": false,
-      "timeout": 1200,
-      "command": "{root}/tools/bin/zap.sh -cmd -quickurl https://{target} -quickout {out}/zap_baseline.html"
+      "timeout": 1080,
+      "command": "timeout 900s {root}/tools/bin/zap.sh -cmd -quickurl https://{target} -quickout {out}/zap_baseline.html"
     },
     "ffuf_controlled": {
       "binary": "ffuf",
@@ -99,6 +108,30 @@
       "requires_approval": true,
       "timeout": 900,
       "command": "msfconsole -q -x 'db_status; exit' > {out}/metasploit_check.txt"
+    },
+    "gowitness_snapshot": {
+      "binary": "gowitness",
+      "category": "visual-evidence",
+      "risk": "low",
+      "requires_approval": false,
+      "timeout": 1200,
+      "command": "CHROME_BIN=\"$(command -v google-chrome || command -v chromium || command -v chromium-browser)\"; if [ -z \"$CHROME_BIN\" ]; then echo \"[ERRO] Chrome/Chromium não localizado para o gowitness.\"; exit 1; fi; mkdir -p {out}/screenshots; GW_RC=1; for GW_ATTEMPT in 1 2; do echo \"[INFO] gowitness tentativa $GW_ATTEMPT/2\"; gowitness scan single --url \"https://{target}\" --chrome-path \"$CHROME_BIN\" --screenshot-path {out}/screenshots --write-jsonl --write-jsonl-file {out}/gowitness_snapshot.jsonl && GW_RC=0 && break; GW_RC=$?; echo \"[WARN] gowitness falhou na tentativa $GW_ATTEMPT com rc=$GW_RC\"; sleep 3; done; exit \"$GW_RC\""
+    },
+    "wpscan_passive": {
+      "binary": "wpscan",
+      "category": "cms-wordpress",
+      "risk": "medium",
+      "requires_approval": false,
+      "timeout": 1800,
+      "command": "wpscan --url \"https://{target}/\" --stealthy --format json --output {out}/wpscan_passive.json --no-update"
+    },
+    "masscan_webports_controlled": {
+      "binary": "masscan",
+      "category": "network-fast-discovery",
+      "risk": "medium",
+      "requires_approval": true,
+      "timeout": 900,
+      "command": "TARGET_IP=\"$(getent ahostsv4 {target} | awk 'NR==1{{print $1}}')\"; if [ -z \"$TARGET_IP\" ]; then echo \"[SKIP] Não foi possível resolver IPv4 para {target}\" > {out}/masscan_webports_controlled.txt; exit 0; fi; echo \"[INFO] target={target} ip=$TARGET_IP\" > {out}/masscan_webports_controlled.txt; masscan \"$TARGET_IP\" -p80,443,8080,8443,8000,8888 --rate 100 --wait 5 -oJ {out}/masscan_webports_controlled.json >> {out}/masscan_webports_controlled.txt 2>&1"
     }
   }
 }
