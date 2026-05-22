@@ -9,6 +9,9 @@ import sys
 import shutil
 from datetime import datetime
 from pathlib import Path
+
+# Raiz oficial do CyberLab
+CYBERLAB_HOME = Path(__file__).resolve().parents[1]
 from typing import Any, Dict, List, Optional
 
 
@@ -198,6 +201,10 @@ def detect_existing_outputs(scan_dir: Path) -> Dict[str, Any]:
             "exists": (scan_dir / "block_15_controlled_validation").exists(),
             "path": str(scan_dir / "block_15_controlled_validation"),
         },
+        "layer6_surface_expansion": {
+            "exists": (scan_dir / "block_6_surface_expansion").exists(),
+            "path": str(scan_dir / "block_6_surface_expansion"),
+        },
         "tool_orchestrator": {
             "exists": (scan_dir / "11-tool-orchestrator").exists(),
             "path": str(scan_dir / "11-tool-orchestrator"),
@@ -312,7 +319,9 @@ def build_client_summary(
     lines.append("")
     lines.append("## Camadas executadas")
     lines.append("")
-    lines.append("- Reconhecimento web e active mode")
+    lines.append("- Reconhecimento web inicial")
+    lines.append("- Camada 6A de expansão passiva de superfície")
+    lines.append("- Active mode controlado")
     lines.append("- Orquestração de ferramentas auditadas")
     lines.append("- Consolidação de findings")
     lines.append("- Validação contextual")
@@ -493,6 +502,17 @@ def orchestrate(client_name: str, target: str, profile: str) -> int:
     print(f"      {scan_dir}")
     print("")
 
+    # 03B — Camada 6A Surface Expansion
+    steps.append(run_step(
+        "03b_surface_expansion",
+        "Camada 6A — expansão passiva de superfície",
+        cyberlab_cmd("surface", target, str(scan_dir), profile),
+        block16_dir,
+        env_extra=env_context,
+        required=False,
+        timeout=3600,
+    ))
+
     # 04 — Active
     steps.append(run_step(
         "04_active_mode",
@@ -513,6 +533,22 @@ def orchestrate(client_name: str, target: str, profile: str) -> int:
         env_extra=env_context,
         required=False,
         timeout=7200,
+    ))
+
+    # 05B – Tool Output Intelligence
+    steps.append(run_step(
+        "05b_tool_output_intelligence",
+        "Parser inteligente dos outputs das ferramentas auditadas",
+        [
+            sys.executable,
+            str(CYBERLAB_HOME / "core" / "tool_output_parser.py"),
+            "--scan-dir",
+            str(scan_dir),
+        ],
+        block16_dir,
+        env_extra=env_context,
+        required=False,
+        timeout=1200,
     ))
 
     # 06 — Bloco 12 / final atual
