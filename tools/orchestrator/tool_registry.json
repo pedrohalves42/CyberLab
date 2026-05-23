@@ -42,6 +42,22 @@
       "gowitness_snapshot",
       "wpscan_passive",
       "masscan_webports_controlled"
+    ],
+    "max-controlled-plus": [
+      "nmap_safe",
+      "httpx_fingerprint",
+      "katana_crawl_light",
+      "ffuf_controlled",
+      "gobuster_controlled",
+      "nikto_safe",
+      "wapiti_light",
+      "zap_baseline",
+      "gowitness_snapshot",
+      "wpscan_passive",
+      "nuclei_controlled",
+      "sqlmap_check",
+      "masscan_webports_controlled",
+      "metasploit_check"
     ]
   },
   "tools": {
@@ -66,8 +82,8 @@
       "category": "web",
       "risk": "medium",
       "requires_approval": false,
-      "timeout": 1200,
-      "command": "wapiti -u https://{target} --scope domain -d 2 --max-scan-time 600 -f json -o {out}/wapiti_light.json"
+      "timeout": 1800,
+      "command": "wapiti -u https://{target} --scope domain -d 2 --max-scan-time 900 --max-links-per-page 30 -f json -o {out}/wapiti_light.json"
     },
     "zap_baseline": {
       "binary": "/home/ph/CyberLab/tools/bin/zap.sh",
@@ -82,16 +98,16 @@
       "category": "web-discovery",
       "risk": "medium",
       "requires_approval": false,
-      "timeout": 900,
-      "command": "ffuf -u https://{target}/FUZZ -w {root}/tools/wordlists/SecLists/Discovery/Web-Content/common.txt -rate 20 -t 10 -mc all -fc 404 -of json -o {out}/ffuf_controlled.json"
+      "timeout": 1200,
+      "command": "ffuf -u https://{target}/FUZZ -w {root}/tools/wordlists/SecLists/Discovery/Web-Content/common.txt -rate 15 -t 8 -timeout 10 -mc 200,204,301,302,307,308,401,403,405 -fc 404 -ac -of json -o {out}/ffuf_controlled.json"
     },
     "gobuster_controlled": {
       "binary": "gobuster",
       "category": "web-discovery",
       "risk": "medium",
       "requires_approval": false,
-      "timeout": 900,
-      "command": "gobuster dir -b 404,403,429 -u https://{target} -w {root}/tools/wordlists/SecLists/Discovery/Web-Content/common.txt -t 10 --delay 100ms -o {out}/gobuster_controlled.txt"
+      "timeout": 1200,
+      "command": "gobuster dir -u https://{target} -w {root}/tools/wordlists/SecLists/Discovery/Web-Content/common.txt -t 8 --delay 100ms -k -b 404,429 -s 200,204,301,302,307,308,401,403,405 -o {out}/gobuster_controlled.txt"
     },
     "sqlmap_check": {
       "binary": "sqlmap",
@@ -132,6 +148,30 @@
       "requires_approval": true,
       "timeout": 900,
       "command": "TARGET_IP=\"$(getent ahostsv4 {target} | awk 'NR==1{{print $1}}')\"; if [ -z \"$TARGET_IP\" ]; then echo \"[SKIP] Não foi possível resolver IPv4 para {target}\" > {out}/masscan_webports_controlled.txt; exit 0; fi; echo \"[INFO] target={target} ip=$TARGET_IP\" > {out}/masscan_webports_controlled.txt; masscan \"$TARGET_IP\" -p80,443,8080,8443,8000,8888 --rate 100 --wait 5 -oJ {out}/masscan_webports_controlled.json >> {out}/masscan_webports_controlled.txt 2>&1"
+    },
+    "httpx_fingerprint": {
+      "binary": "httpx",
+      "category": "web-fingerprint",
+      "risk": "low",
+      "requires_approval": false,
+      "timeout": 900,
+      "command": "printf 'https://{target}\\nhttp://{target}\\n' | httpx -silent -status-code -title -tech-detect -server -cdn -location -follow-redirects -json -rl 5 -retries 1 -timeout 10 -o {out}/httpx_fingerprint.json"
+    },
+    "katana_crawl_light": {
+      "binary": "katana",
+      "category": "url-discovery",
+      "risk": "medium",
+      "requires_approval": false,
+      "timeout": 1200,
+      "command": "katana -u https://{target} -d 2 -silent -json -jc -kf all -fx -rl 3 -c 5 -timeout 10 -o {out}/katana_crawl_light.json"
+    },
+    "nuclei_controlled": {
+      "binary": "nuclei",
+      "category": "vulnerability-scanner",
+      "risk": "medium",
+      "requires_approval": true,
+      "timeout": 1800,
+      "command": "nuclei -u https://{target} -severity low,medium,high,critical -tags exposure,misconfig,cve,oast,token,secret,auth,redirect,headers,takeover -etags dos,fuzz,bruteforce,intrusive -jsonl -silent -rl 15 -c 15 -retries 0 -timeout 6 -duc -ni -o {out}/nuclei_controlled.json"
     }
   }
 }

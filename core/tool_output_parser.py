@@ -60,6 +60,20 @@ def read_json(path: Path) -> Any:
         return None
 
 
+
+def detect_executed_tools_from_evidence(evidence_items):
+    """
+    Conta ferramentas que executaram e geraram artefatos,
+    mesmo quando não produziram achados estruturados.
+    """
+    tools = {}
+    for ev in evidence_items or []:
+        tool = ev.get("tool")
+        if not tool:
+            continue
+        tools.setdefault(tool, 0)
+    return tools
+
 def write_json(path: Path, data: Any) -> None:
     path.write_text(
         json.dumps(data, ensure_ascii=False, indent=2) + "\n",
@@ -1117,6 +1131,35 @@ def build_markdown_summary(
     return "\n".join(lines)
 
 
+
+# ============================================================
+# CyberLab - Normalização de ferramentas sem achados
+# ============================================================
+
+def normalize_empty_tool_result(tool_name: str, output_file: Path, stdout_file: Path = None, stderr_file: Path = None):
+    """
+    Quando uma ferramenta executa corretamente mas gera JSON vazio,
+    isso não deve ser tratado como ausência da ferramenta.
+    Exemplo: Nuclei exit 0 + JSON vazio = OK_NO_FINDINGS.
+    """
+    result = {
+        "tool": tool_name,
+        "status": "OK_NO_FINDINGS",
+        "title": f"{tool_name}: executado sem achados",
+        "severity": "INFO",
+        "category": "tool-execution",
+        "confidence": "confirmed_no_findings",
+        "description": f"{tool_name} executou corretamente, mas não retornou achados estruturados.",
+        "evidence": str(output_file) if output_file else None,
+        "metadata": {
+            "empty_result": True,
+            "stdout_log": str(stdout_file) if stdout_file else None,
+            "stderr_log": str(stderr_file) if stderr_file else None,
+        }
+    }
+    return result
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="CyberLab Tool Output Parser"
@@ -1146,5 +1189,83 @@ def main() -> int:
     return 0
 
 
+
+def cyberlab_postprocess_zero_finding_tools_from_evidence():
+    """
+    Pós-processamento defensivo do 05B:
+    se uma ferramenta gerou evidência/log/artefato, mas teve 0 achados,
+    ela também deve aparecer em tool_counts com valor 0.
+    """
+    import json
+    import sys
+    from pathlib import Path
+
+    scan_dir = None
+
+    for i, arg in enumerate(sys.argv):
+        if arg == "--scan-dir" and i + 1 < len(sys.argv):
+            scan_dir = sys.argv[i + 1]
+            break
+        if arg.startswith("--scan-dir="):
+            scan_dir = arg.split("=", 1)[1]
+            break
+
+    if not scan_dir:
+        return
+
+    scan_dir = Path(scan_dir)
+    out_dir = scan_dir / "11-tool-orchestrator" / "tool_output_intelligence"
+    status_path = out_dir / "tool-output-status.json"
+    evidence_path = out_dir / "tool-evidence-index.json"
+
+    if not status_path.exists():
+        return
+
+    try:
+        status = json.loads(status_path.read_text(encoding="utf-8"))
+    except Exception:
+        return
+
+    tools = set()
+
+    def walk(obj):
+        if isinstance(obj, dict):
+            tool = obj.get("tool")
+            if tool and isinstance(tool, str):
+                tools.add(tool)
+            for v in obj.values():
+                walk(v)
+        elif isinstance(obj, list):
+            for v in obj:
+                walk(v)
+
+    if evidence_path.exists():
+        try:
+            evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+            walk(evidence)
+        except Exception:
+            pass
+
+    orch_dir = scan_dir / "11-tool-orchestrator"
+    if orch_dir.exists():
+        for child in orch_dir.iterdir():
+            if child.is_dir() and child.name != "tool_output_intelligence":
+                if any(child.iterdir()):
+                    tools.add(child.name)
+
+    status.setdefault("tool_counts", {})
+    for tool in sorted(tools):
+        status["tool_counts"].setdefault(tool, 0)
+
+    status_path.write_text(
+        json.dumps(status, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    _cyberlab_exit_code = main()
+    try:
+        cyberlab_postprocess_zero_finding_tools_from_evidence()
+    except Exception as exc:
+        print(f"[WARN] postprocess zero-finding tools falhou: {exc}")
+    raise SystemExit(_cyberlab_exit_code)

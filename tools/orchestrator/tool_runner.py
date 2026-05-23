@@ -314,7 +314,7 @@ def write_summary(
 def main():
     parser = argparse.ArgumentParser(description="CyberLab controlled tool orchestrator")
     parser.add_argument("--target", required=True)
-    parser.add_argument("--profile", default="safe", choices=["safe", "active", "active-plus", "max-controlled"])
+    parser.add_argument("--profile", default="safe", help="Perfil definido em tools/orchestrator/tool_registry.json")
     parser.add_argument("--approve", action="store_true", help="permite ferramentas que exigem aprovação")
     args = parser.parse_args()
 
