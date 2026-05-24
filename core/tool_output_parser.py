@@ -1190,6 +1190,76 @@ def main() -> int:
 
 
 
+
+
+def cyberlab_get_scan_dir_from_argv():
+    """
+    Extrai --scan-dir da linha de comando para pós-processamentos do parser.
+    """
+    import sys
+    from pathlib import Path
+
+    for i, arg in enumerate(sys.argv):
+        if arg == "--scan-dir" and i + 1 < len(sys.argv):
+            return Path(sys.argv[i + 1])
+        if arg.startswith("--scan-dir="):
+            return Path(arg.split("=", 1)[1])
+
+    return None
+
+def cyberlab_run_bugbounty_accuracy(scan_dir):
+    """
+    Executa a camada Bug Bounty Accuracy após o parser 05B.
+    Não falha o parser principal se a camada de accuracy falhar.
+    """
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    scan_dir = Path(scan_dir)
+
+    accuracy_script = Path(__file__).resolve().parent / "bugbounty_accuracy.py"
+
+    if not accuracy_script.exists():
+        print(f"[WARN] bugbounty_accuracy.py não encontrado: {accuracy_script}")
+        return False
+
+    cmd = [
+        sys.executable,
+        str(accuracy_script),
+        "--scan-dir",
+        str(scan_dir),
+    ]
+
+    try:
+        proc = subprocess.run(
+            cmd,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=300,
+        )
+
+        if proc.stdout.strip():
+            print(proc.stdout.strip())
+
+        if proc.returncode != 0:
+            print("[WARN] Bug Bounty Accuracy retornou erro.")
+            if proc.stderr.strip():
+                print(proc.stderr.strip())
+            return False
+
+        print("[OK] Bug Bounty Accuracy integrado ao 05B.")
+        return True
+
+    except subprocess.TimeoutExpired:
+        print("[WARN] Bug Bounty Accuracy excedeu timeout interno.")
+        return False
+
+    except Exception as exc:
+        print(f"[WARN] Bug Bounty Accuracy falhou: {exc}")
+        return False
+
 def cyberlab_postprocess_zero_finding_tools_from_evidence():
     """
     Pós-processamento defensivo do 05B:
@@ -1264,8 +1334,58 @@ def cyberlab_postprocess_zero_finding_tools_from_evidence():
 
 if __name__ == "__main__":
     _cyberlab_exit_code = main()
+
     try:
         cyberlab_postprocess_zero_finding_tools_from_evidence()
     except Exception as exc:
         print(f"[WARN] postprocess zero-finding tools falhou: {exc}")
+
+    try:
+        _scan_dir = cyberlab_get_scan_dir_from_argv()
+        if _scan_dir:
+            cyberlab_run_bugbounty_accuracy(_scan_dir)
+        else:
+            print("[WARN] --scan-dir não encontrado; Bug Bounty Accuracy não executado.")
+    except Exception as exc:
+        print(f"[WARN] Integração Bug Bounty Accuracy falhou: {exc}")
+
     raise SystemExit(_cyberlab_exit_code)
+
+if __name__ == "__main__":
+    _cyberlab_exit_code = main()
+
+    try:
+        cyberlab_postprocess_zero_finding_tools_from_evidence()
+    except Exception as exc:
+        print(f"[WARN] postprocess zero-finding tools falhou: {exc}")
+
+    try:
+        _scan_dir = cyberlab_get_scan_dir_from_argv()
+        if _scan_dir:
+            cyberlab_run_bugbounty_accuracy(_scan_dir)
+        else:
+            print("[WARN] --scan-dir não encontrado; Bug Bounty Accuracy não executado.")
+    except Exception as exc:
+        print(f"[WARN] Integração Bug Bounty Accuracy falhou: {exc}")
+
+    raise SystemExit(_cyberlab_exit_code)
+
+if __name__ == "__main__":
+    _cyberlab_exit_code = main()
+
+    try:
+        cyberlab_postprocess_zero_finding_tools_from_evidence()
+    except Exception as exc:
+        print(f"[WARN] postprocess zero-finding tools falhou: {exc}")
+
+    try:
+        _scan_dir = cyberlab_get_scan_dir_from_argv()
+        if _scan_dir:
+            cyberlab_run_bugbounty_accuracy(_scan_dir)
+        else:
+            print("[WARN] --scan-dir não encontrado; Bug Bounty Accuracy não executado.")
+    except Exception as exc:
+        print(f"[WARN] Integração Bug Bounty Accuracy falhou: {exc}")
+
+    raise SystemExit(_cyberlab_exit_code)
+

@@ -397,6 +397,61 @@ def create_client_delivery_index(
     return index_path
 
 
+
+def collect_bugbounty_accuracy(scan_dir: Path) -> Dict[str, Any]:
+    """
+    Coleta o resumo de Bug Bounty Accuracy gerado pelo Tool Output Intelligence.
+    Não altera severidade final sozinho; apenas adiciona contexto de priorização.
+    """
+    out_dir = scan_dir / "11-tool-orchestrator" / "tool_output_intelligence"
+    json_path = out_dir / "bugbounty-accuracy.json"
+    md_path = out_dir / "bugbounty-accuracy-summary.md"
+
+    data: Dict[str, Any] = {
+        "available": False,
+        "json": str(json_path),
+        "summary_md": str(md_path),
+        "raw_count": 0,
+        "deduped_count": 0,
+        "duplicate_count": 0,
+        "accuracy_counts": {},
+        "severity_counts": {},
+        "tool_counts": {},
+        "top_priority": [],
+    }
+
+    if not json_path.exists():
+        return data
+
+    try:
+        payload = read_json(json_path)
+    except Exception:
+        return data
+
+    data["available"] = True
+    data["raw_count"] = payload.get("raw_count", 0)
+    data["deduped_count"] = payload.get("deduped_count", payload.get("findings_count", 0))
+    data["duplicate_count"] = payload.get("duplicate_count", 0)
+    data["accuracy_counts"] = payload.get("accuracy_counts", {})
+    data["severity_counts"] = payload.get("severity_counts", {})
+    data["tool_counts"] = payload.get("tool_counts", {})
+
+    top = []
+    for item in payload.get("priority", [])[:10]:
+        meta = item.get("metadata", {}) or {}
+        top.append({
+            "tool": item.get("tool"),
+            "severity": item.get("severity"),
+            "title": item.get("title"),
+            "accuracy": meta.get("accuracy_status"),
+            "confidence": meta.get("confidence_score"),
+            "priority": meta.get("bugbounty_priority_score"),
+            "priority_reasons": meta.get("bugbounty_priority_reasons", []),
+        })
+
+    data["top_priority"] = top
+    return data
+
 def orchestrate(client_name: str, target: str, profile: str) -> int:
     start_time = now_iso()
 
@@ -599,6 +654,9 @@ def orchestrate(client_name: str, target: str, profile: str) -> int:
     pdfs = find_pdfs(scan_dir)
     status_counts = count_statuses(steps)
     final_status = pipeline_final_status(steps)
+    bugbounty_accuracy = collect_bugbounty_accuracy(scan_dir)
+
+
 
     manifest = {
         "block": "16",
@@ -613,6 +671,7 @@ def orchestrate(client_name: str, target: str, profile: str) -> int:
         "status_counts": status_counts,
         "steps": steps,
         "outputs": outputs,
+        "bugbounty_accuracy": bugbounty_accuracy,
         "pdfs": pdfs,
         "scan_context": scan_context,
     }
